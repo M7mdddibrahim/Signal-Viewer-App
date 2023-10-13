@@ -72,7 +72,7 @@ class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
         # loading ui file
-        self.ui = uic.loadUi("GUI-3.ui", self)
+        self.ui = uic.loadUi("GUI.ui", self)
         # Connect widgets to methods here
         # self.actionZoomOut.triggered.connect(self.print)
         self.actionChannel1.triggered.connect(self.DrawChannel1)
@@ -144,6 +144,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.max2 = 0
         self.min2 = 0
         self.connect_status = False
+        self.Xmin1 = self.Xmin2 = 0.0
         self.Ymin1 = self.Ymin2 = float('inf')
         self.Xmax1 = self.Xmax2 = self.Ymax1 = self.Ymax2 = float('-inf')
         self.graphWidget1.addLegend()
@@ -221,8 +222,7 @@ class MyWindow(QtWidgets.QMainWindow):
             self.Ymin1 = newplot.data["amplitude"].min()
         if newplot.data["amplitude"].max() > self.Ymax1:
             self.Ymax1 = newplot.data["amplitude"].max()
-        self.graphWidget1.setYRange(self.Ymin1,self.Ymax1,padding = 0)
-        self.graphWidget1.setXRange(0,self.Xmax1,padding = 0)
+        self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = self.Xmax1, yMin = self.Ymin1, yMax = self.Ymax1)
 
     def load2(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
@@ -253,8 +253,7 @@ class MyWindow(QtWidgets.QMainWindow):
             self.Ymin2 = newplot.data["amplitude"].min()
         if newplot.data["amplitude"].max() > self.Ymax2:
             self.Ymax2 = newplot.data["amplitude"].max()
-        self.graphWidget2.setYRange(self.Ymin2,self.Ymax2,padding = 0)
-        self.graphWidget2.setXRange(0,self.Xmax2,padding = 0)
+        self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = self.Xmax2, yMin = self.Ymin2, yMax = self.Ymax2)
 
     def showHideChannel1(self):
         newplot = self.GetChosenPlotLine1()
@@ -310,18 +309,25 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
+                    self.graphWidget1.setYRange(
+                        newplot.data["amplitude"][newplot.index],
+                        newplot.data["amplitude"][newplot.index],
+                        padding=0,
+                    )
 
                     newplot.index += 1
         elif self.ispaused1 == 1:
             pass
 
             # Check if all data is plotted; if so, stop the timer
-        if all(newplot.index >= len(newplot.data) for newplot in PlotLines1) and all(
-            newplot.index >= len(newplot.data) for newplot in PlotLines2
-        ):
+        if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
             self.graphWidget1.setXRange(
                 newplot.data["time"][0],
                 newplot.data["time"][len(newplot.data["time"]) - 1],
+            )
+            self.graphWidget1.setYRange(
+                newplot.data["amplitude"].min(),
+                newplot.data["amplitude"].max(),
             )
             self.timer1.stop()
 
@@ -347,6 +353,11 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
+                    self.graphWidget2.setYRange(
+                        newplot.data["amplitude"][newplot.index],
+                        newplot.data["amplitude"][newplot.index],
+                        padding=0,
+                    )
 
                     newplot.index += 1
         elif self.ispaused2 == 1:
@@ -355,6 +366,10 @@ class MyWindow(QtWidgets.QMainWindow):
             self.graphWidget2.setXRange(
                 newplot.data["time"][0],
                 newplot.data["time"][len(newplot.data["time"]) - 1],
+            )
+            self.graphWidget2.setYRange(
+                newplot.data["amplitude"].min(),
+                newplot.data["amplitude"].max(),
             )
             self.timer2.stop()
 
