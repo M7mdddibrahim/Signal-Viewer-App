@@ -26,6 +26,7 @@ import PIL
 import tempfile
 from fpdf import FPDF
 
+x = 0
 
 class InputDialog(QtWidgets.QDialog):
     def __init__(self, parent=None):
