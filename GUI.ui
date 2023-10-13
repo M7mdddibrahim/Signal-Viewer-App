@@ -24,6 +24,18 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="2" column="0">
+        <widget class="QComboBox" name="comboBox">
+         <property name="placeholderText">
+          <string/>
+         </property>
+         <item>
+          <property name="text">
+           <string>Choose Channel</string>
+          </property>
+         </item>
+        </widget>
+       </item>
        <item row="0" column="0">
         <widget class="QFrame" name="frame_3">
          <property name="frameShape">
@@ -61,16 +73,11 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QComboBox" name="comboBox">
-         <property name="placeholderText">
-          <string/>
+       <item row="3" column="0">
+        <widget class="QScrollBar" name="horizontalScrollBar">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
-         <item>
-          <property name="text">
-           <string>Choose Channel</string>
-          </property>
-         </item>
         </widget>
        </item>
       </layout>
@@ -130,6 +137,13 @@
            <string>Choose Channel</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QScrollBar" name="horizontalScrollBar_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
         </widget>
        </item>
       </layout>
