@@ -106,7 +106,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.Color1.triggered.connect(self.ChangeColor1)
         self.Color2.triggered.connect(self.ChangeColor2)
         self.actionRewind1.triggered.connect(self.rewind1)
-        # self.actionRewind2.triggered.connect(self.rewind2)
+        self.actionrewind2.triggered.connect(self.rewind2)
         self.actionSave_As_PDF.triggered.connect(self.create_pdf_with_qimages)
         self.actionConnect.triggered.connect(self.ConnectGraphs)
         self.horizontalScrollBar.valueChanged.connect(self.ScrollChannel1)
@@ -191,9 +191,6 @@ class MyWindow(QtWidgets.QMainWindow):
         pen = newplot.pen
         newplot.data_line = self.graphWidget1.plot(pen=pen)
         newplot.index = 0
-        # list = []
-        # list.append(newplot.name)
-        # self.comboBox.addItems(list)
         self.horizontalScrollBar.setMinimum(int(self.graphWidget1.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel1))
         self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel1))
 
@@ -203,6 +200,21 @@ class MyWindow(QtWidgets.QMainWindow):
             self.update_plots1
         )  # Connect to a single update method
         self.timer1.start()
+
+
+        def Draw2(self,newplot):
+            pen = newplot.pen
+            newplot.data_line = self.graphWidget2.plot(pen=pen)
+            newplot.index = 0
+            self.horizontalScrollBar.setMinimum(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel2))
+            self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel2))
+
+            self.timer2 = QtCore.QTimer()
+            self.timer2.setInterval(int(50 / self.signal2speed))
+            self.timer2.timeout.connect(
+                self.update_plots2
+            )  # Connect to a single update method
+            self.timer2.start()
 
     def DrawChannel2(self):
         self.load2()
@@ -321,21 +333,27 @@ class MyWindow(QtWidgets.QMainWindow):
         elif self.timer1.isActive() == False:
             newplot.data_line.clear()
             self.Draw1(newplot)
-            self.ispaused1 = 0
-
-            
+            self.ispaused1 = 0   
         else:
             self.ispaused1 = 0
             newplot.data_line.clear()
             newplot.index = 0
 
-
-
-    # def rewind2(self):
-    #     if self.timer1.remainingTime() !=0:
-    #         stop
-    #     else:
-    #         rewind;
+    def rewind2(self):
+        newplot = self.GetChosenPlotLine2()
+        if newplot == -1 or len(PlotLines2) == 0:
+            self.ErrorMsg("No Signal Chosen")
+            return
+        if self.timer2.isActive() and self.ispaused2 == 0:
+            self.ispaused2 = 1
+        elif self.timer2.isActive() == False:
+            newplot.data_line.clear()
+            self.Draw2(newplot)
+            self.ispaused2 = 0   
+        else:
+            self.ispaused2 = 0
+            newplot.data_line.clear()
+            newplot.index = 0
 
     def ErrorMsg(self, text):
         msg = QMessageBox()
@@ -351,7 +369,6 @@ class MyWindow(QtWidgets.QMainWindow):
             self.update_plots1
         )  # Connect to a single update method
         self.timer1.start()
-
         # Connect to a single update method
         if self.ispaused1 == 0:
             for newplot in PlotLines1:
@@ -444,81 +461,57 @@ class MyWindow(QtWidgets.QMainWindow):
             self.timer2.stop()
 
     def zoomInChannel1(self):
-        # self.zoomFactorChannel1 *= 2.0  # Adjust the zoom factor as needed
-        # self.update_plots1()
-
         viewbox = self.graphWidget1.getViewBox()
         x_min, x_max = self.graphWidget1.viewRange()[0]
-
         # Decrease the scale (range) of the X and Y axes to zoom in
         new_x_range = viewbox.viewRange()[0]
         new_y_range = viewbox.viewRange()[1]
-
         new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
         new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
         self.zoomFactorChannel1 /= 0.8
-
         viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots1()
 
-
     def zoomInChannel2(self):
-        # self.zoomFactorChannel2 *= 2.0  # Adjust the zoom factor as needed
-        # self.update_plots2()
         viewbox = self.graphWidget2.getViewBox()
         x_min, x_max = self.graphWidget2.viewRange()[0]
-
         # Decrease the scale (range) of the X and Y axes to zoom in
         new_x_range = viewbox.viewRange()[0]
         new_y_range = viewbox.viewRange()[1]
-
         new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
         new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
         self.zoomFactorChannel2 /= 0.8
-
         viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots2()
 
-
     def zoomOutChannel1(self):
-        # self.zoomFactorChannel1 /= 2.0  # Adjust the zoom factor as needed
-        # self.update_plots1()
         viewbox = self.graphWidget1.getViewBox()
         x_min, x_max = self.graphWidget1.viewRange()[0]
         if x_min == 0 and x_max == self.Xmax1:
             return
-
         # Decrease the scale (range) of the X and Y axes to zoom in
         new_x_range = viewbox.viewRange()[0]
         new_y_range = viewbox.viewRange()[1]
-
         new_x_range = (new_x_range[0] * 1.2, new_x_range[1] * 1.2)
         new_y_range = (new_y_range[0] * 1.2, new_y_range[1] * 1.2)
         self.zoomFactorChannel1 /= 1.2
-
         viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots1()
 
-
     def zoomOutChannel2(self):
-        # self.zoomFactorChannel2 /= 2.0  # Adjust the zoom factor as needed
-        # self.update_plots2()
         viewbox = self.graphWidget2.getViewBox()
         x_min, x_max = self.graphWidget2.viewRange()[0]
         if x_min == 0 and x_max == self.Xmax2:
             return
-
         # Decrease the scale (range) of the X and Y axes to zoom in
         new_x_range = viewbox.viewRange()[0]
         new_y_range = viewbox.viewRange()[1]
-
         new_x_range = (new_x_range[0] * 1.2, new_x_range[1] * 1.2)
         new_y_range = (new_y_range[0] * 1.2, new_y_range[1] * 1.2)
         self.zoomFactorChannel2 /= 1.2
-
         viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots2()
@@ -541,24 +534,18 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines1) == 0 or oldplot == -1:
             self.ErrorMsg("No Signal Chosen")
             return
-
         newplot = PLotLine()
         newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
-
         pen = pg.mkPen(color=(255, 0, 0))
         name = "Signal" + str(len(PlotLines2))
         newplot.data_line = self.graphWidget2.plot(pen=pen, name=name)
-
         # Make sure the data is within the visible range of the second graph
         self.graphWidget2.setXRange(newplot.data["time"].min(), newplot.data["time"].max())
-
         PlotLines2.append(newplot)
         newplot.index = 0
         newplot.ChannelNum = 2
-
         # Clear the old data in the first graph if needed
         oldplot.data_line.clear()
-
         # Update the second graph to ensure the data is plotted
         self.update_plots2()
 
@@ -567,36 +554,20 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines2) == 0 or oldplot == -1:
             self.ErrorMsg("No Signal Chosen")
             return
-
         newplot = PLotLine()
         newplot.data = oldplot.data  # Copy the data from the second plot to the new plot
-
         pen = pg.mkPen(color=(255, 0, 0))
         name = "Signal" + str(len(PlotLines1))
         newplot.data_line = self.graphWidget1.plot(pen=pen, name=name)
-
         # Make sure the data is within the visible range of the first graph
         self.graphWidget1.setXRange(newplot.data["time"].min(), newplot.data["time"].max())
-
         PlotLines1.append(newplot)
         newplot.index = 0
         newplot.ChannelNum = 1
-
         # Clear the old data in the second graph if needed
         oldplot.data_line.clear()
-
         # Update the first graph to ensure the data is plotted
         self.update_plots1()
-
-    # def ConnectGraphs(self):
-    #     # Get properties of the first graph (graphWidget1)
-    #     x_range1 = self.graphWidget1.getViewBox().viewRange()[0]
-    #     signal1_speed = self.signal1speed
-
-    #     # Apply properties to the second graph (graphWidget2)
-    #     self.graphWidget2.setXRange(x_range1[0], x_range1[1], padding=0)
-    #     self.signal2speed = signal1_speed
-    #     self.update_plots2()
 
     def ConnectGraphs(self):
         if self.connect_status:
@@ -623,7 +594,6 @@ class MyWindow(QtWidgets.QMainWindow):
             self.graphWidget1.setYRange(*y_range1, padding=0)
             self.graphWidget2.setXRange(*x_range1, padding=0)
             self.signal2speed = signal1_speed
-
 
     def changesignal1speed25(self):
         self.signal1speed = 0.25
@@ -733,7 +703,6 @@ class MyWindow(QtWidgets.QMainWindow):
         image = pixmap.toImage()
         snapshots1.append(image)
         image.save("snapshot_channel1" + str(len(snapshots1)) + ".png")
-
         # Display a message to the user
         msg = QMessageBox()
         msg.setWindowTitle("Snapshot Saved")
@@ -747,7 +716,6 @@ class MyWindow(QtWidgets.QMainWindow):
         image = pixmap.toImage()
         snapshots2.append(image)
         image.save("snapshot_channel2" + str(len(snapshots2)) + ".png")
-
         # Display a message to the user
         msg = QMessageBox()
         msg.setWindowTitle("Snapshot Saved")
@@ -910,8 +878,17 @@ class MyWindow(QtWidgets.QMainWindow):
             self.ErrorMsg("No Chosen Color")
 
     def ScrollChannel1(self):
-        Value = self.horizontalScrollBar.value()
+        scroll_value = self.horizontalScrollBar.value()
+        # Calculate the new view range based on the scroll value and zoom factor
+        new_x_min = scroll_value
+        new_x_max = new_x_min + self.graphWidget1.getViewBox().viewRange()[0][1]
 
+        # Update the view range of the plot widget to scroll the graph window
+        self.graphWidget1.setXRange(new_x_min, new_x_max, padding=0)
+
+        # Update the horizontal scroll bar range and value
+        self.horizontalScrollBar.setRange(0, int(self.zoomFactorChannel1))
+        self.horizontalScrollBar.setValue(scroll_value)
 
     def ScrollChannel2(self):
         Value = self.horizontalScrollBar_2.value()
