@@ -162,6 +162,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.graphWidget1.setLabel("left", "Amplitude")
         self.graphWidget1.setLabel("bottom", "Time")
 
+        -----
+
 
     def DrawChannel1(self):
         self.load1()
