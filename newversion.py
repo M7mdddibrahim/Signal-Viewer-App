@@ -109,12 +109,18 @@ class MyWindow(QtWidgets.QMainWindow):
         self.actionrewind2.triggered.connect(self.rewind2)
         self.actionSave_As_PDF.triggered.connect(self.create_pdf_with_qimages)
         self.actionConnect.triggered.connect(self.ConnectGraphs)
-        self.horizontalScrollBar.valueChanged.connect(self.ScrollChannel1)
-        self.horizontalScrollBar_2.valueChanged.connect(self.ScrollChannel2)
+        self.horizontalScrollBar_11.valueChanged.connect(self.HScrollChannel11)
+        self.horizontalScrollBar_12.valueChanged.connect(self.HScrollChannel12)
+        self.horizontalScrollBar_21.valueChanged.connect(self.HScrollChannel21)
+        self.horizontalScrollBar_22.valueChanged.connect(self.HScrollChannel22)
+        self.verticalScrollBar_11.valueChanged.connect(self.VScrollChannel11)
+        self.verticalScrollBar_12.valueChanged.connect(self.VScrollChannel12)
+        self.verticalScrollBar_21.valueChanged.connect(self.VScrollChannel21)
+        self.verticalScrollBar_22.valueChanged.connect(self.VScrollChannel22)
 
         # setting plotting graph color to grey
         pg.setConfigOption("background", "#1f1f1f")
-        pd.options.display.max_rows = 999999
+        pd.options.display.max_rows = 99999
         # creating plot widget
         self.graphWidget1 = pg.PlotWidget()
         self.graphWidget2 = pg.PlotWidget()
@@ -177,8 +183,6 @@ class MyWindow(QtWidgets.QMainWindow):
         list = []
         list.append(newplot.name)
         self.comboBox.addItems(list)
-        self.horizontalScrollBar.setMinimum(0)
-        self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
 
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
@@ -191,8 +195,6 @@ class MyWindow(QtWidgets.QMainWindow):
         pen = newplot.pen
         newplot.data_line = self.graphWidget1.plot(pen=pen)
         newplot.index = 0
-        self.horizontalScrollBar.setMinimum(0)
-        self.horizontalScrollBar.setMaximum(self.Xmax1*10)
 
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
@@ -206,8 +208,6 @@ class MyWindow(QtWidgets.QMainWindow):
         pen = newplot.pen
         newplot.data_line = self.graphWidget2.plot(pen=pen)
         newplot.index = 0
-        self.horizontalScrollBar.setMinimum(0)
-        self.horizontalScrollBar.setMaximum(self.Xmax2*10)
 
         self.timer2 = QtCore.QTimer()
         self.timer2.setInterval(int(50 / self.signal2speed))
@@ -227,8 +227,6 @@ class MyWindow(QtWidgets.QMainWindow):
         list = []
         list.append(newplot.name)
         self.comboBox_2.addItems(list)
-        self.horizontalScrollBar_2.setMinimum(0)
-        self.horizontalScrollBar_2.setMaximum(self.Xmax2*10)
 
         self.timer2 = QtCore.QTimer()
         self.timer2.setInterval(int(50 / self.signal2speed))
@@ -384,8 +382,22 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
-                    self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
-                    self.horizontalScrollBar.setValue(int((self.graphWidget1.getViewBox().viewRange()[0][0]/newplot.data["time"].max())*self.Xmax1*10))
+                    xmin = self.graphWidget1.getViewBox().viewRange()[0][0]
+                    xmax = self.graphWidget1.getViewBox().viewRange()[0][1]
+                    ymin = self.graphWidget1.getViewBox().viewRange()[1][0]
+                    ymax = self.graphWidget1.getViewBox().viewRange()[1][1]
+                    self.horizontalScrollBar_11.setMinimum(0)
+                    self.horizontalScrollBar_12.setMinimum(0)
+                    self.horizontalScrollBar_11.setMaximum(int(self.Xmax1*10))
+                    self.horizontalScrollBar_12.setMaximum(int(self.Xmax1*10))
+                    self.horizontalScrollBar_11.setValue(int(xmin*10))
+                    self.horizontalScrollBar_12.setValue(int(xmax*10))
+                    self.verticalScrollBar_11.setMinimum(0)
+                    self.verticalScrollBar_12.setMinimum(0)
+                    self.verticalScrollBar_11.setMaximum(int(self.Ymax1*10))
+                    self.verticalScrollBar_12.setMaximum(int(self.Ymax1*10))
+                    self.verticalScrollBar_11.setValue(int(ymin*10))
+                    self.verticalScrollBar_12.setValue(int(ymax*10))
 
                     self.graphWidget1.setYRange(
                         newplot.data["amplitude"][newplot.index],
@@ -432,10 +444,25 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
-                    self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
-                    self.horizontalScrollBar_2.setValue(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.Xmax2*10))
+                    xmin = self.graphWidget2.getViewBox().viewRange()[0][0]
+                    xmax = self.graphWidget2.getViewBox().viewRange()[0][1]
+                    ymin = self.graphWidget1.getViewBox().viewRange()[1][0]
+                    ymax = self.graphWidget1.getViewBox().viewRange()[1][1]
+                    self.horizontalScrollBar_21.setMinimum(0)
+                    self.horizontalScrollBar_22.setMinimum(0)
+                    self.horizontalScrollBar_21.setMaximum(int(self.Xmax1*10))
+                    self.horizontalScrollBar_22.setMaximum(int(self.Xmax1*10))
+                    self.horizontalScrollBar_21.setValue(int(xmin*10))
+                    self.horizontalScrollBar_22.setValue(int(xmax*10))
+                    self.verticalScrollBar_21.setMinimum(0)
+                    self.verticalScrollBar_22.setMinimum(0)
+                    self.verticalScrollBar_21.setMaximum(int(self.Ymax1*10))
+                    self.verticalScrollBar_22.setMaximum(int(self.Ymax1*10))
+                    self.verticalScrollBar_21.setValue(int(ymin*10))
+                    self.verticalScrollBar_22.setValue(int(ymax*10))
+
                     if self.graphWidget2.getViewBox().viewRange()[0][1] == self.Xmax2 and self.graphWidget2.getViewBox().viewRange()[0][0] == 0:
-                        self.horizontalScrollBar_2.setMinimum(int(self.zoomFactorChannel2))
+                        self.horizontalScrollBar_2.setMinimum(int(self.Xmax2))
                     else:
                         self.horizontalScrollBar_2.setMinimum(0)
 
@@ -877,24 +904,72 @@ class MyWindow(QtWidgets.QMainWindow):
         else:
             self.ErrorMsg("No Chosen Color")
 
-    def ScrollChannel1(self):
+    def HScrollChannel11(self):
         if self.ispaused1 == 1:
-            scroll_value = self.horizontalScrollBar.value()
-            # Calculate the new view range based on the scroll value and zoom factor
-            xrange = self.Xmax1 / 4
-            new_x_min = scroll_value
-            new_x_max = new_x_min + xrange
+            scroll_value = self.horizontalScrollBar_11.value()
+            xmax = self.graphWidget1.getViewBox().viewRange()[0][1]
+            self.graphWidget1.setXRange(scroll_value/10,xmax,padding=0)
+            
 
-            # Update the view range of the plot widget to scroll the graph window
-            self.graphWidget1.setXRange(new_x_min, new_x_max, padding=0)
-            self.graphWidget1.setYRange(self.Ymin1,self.Ymax1)
+    # def ScrollChannel1(self):
+    #     if self.ispaused1 == 1:
+    #         scroll_value = self.horizontalScrollBar.value()
+    #         # Calculate the new view range based on the scroll value and zoom factor
+    #         xmin = self.graphWidget1.getViewBox().viewRange()[0][0]
+    #         xmax = self.graphWidget1.getViewBox().viewRange()[0][1]
+    #         xrange = xmax - xmin
+    #         new_x_min = scroll_value
+    #         new_x_max = new_x_min + xrange
 
-            # Update the horizontal scroll bar range and value
-            self.horizontalScrollBar.setRange(0, int(self.Xmax1))
-            self.horizontalScrollBar.setValue(scroll_value)
+    #         # Update the view range of the plot widget to scroll the graph window
+    #         self.graphWidget1.setXRange(new_x_min, new_x_max, padding=0)
 
-    def ScrollChannel2(self):
-        Value = self.horizontalScrollBar_2.value()
+    #         # Update the horizontal scroll bar range and value
+    #         self.horizontalScrollBar.setRange(0, int(self.Xmax1))
+    #         self.horizontalScrollBar.setValue(scroll_value)
+
+    def HScrollChannel12(self):
+        if self.ispaused1 == 1:
+            scroll_value = self.horizontalScrollBar_12.value()
+            xmin = self.graphWidget1.getViewBox().viewRange()[0][0]
+            self.graphWidget1.setXRange(xmin,scroll_value/10,padding=0)
+
+    def HScrollChannel21(self):
+        if self.ispaused2 == 1:
+            scroll_value = self.horizontalScrollBar_21.value()
+            xmax = self.graphWidget2.getViewBox().viewRange()[0][1]
+            self.graphWidget1.setXRange(scroll_value/10,xmax,padding=0)
+
+    def HScrollChannel22(self):
+        if self.ispaused2 == 1:
+            scroll_value = self.horizontalScrollBar_22.value()
+            xmin = self.graphWidget1.getViewBox().viewRange()[0][0]
+            self.graphWidget1.setXRange(xmin,scroll_value/10,padding=0)
+
+    def VScrollChannel11(self):
+        if self.ispaused1 == 1:
+            scroll_value = self.horizontalScrollBar_11.value()
+            ymax = self.graphWidget1.getViewBox().viewRange()[1][1]
+            self.graphWidget1.setXRange(scroll_value/10,ymax,padding=0)
+
+    def VScrollChannel12(self):
+        if self.ispaused1 == 1:
+            scroll_value = self.horizontalScrollBar_12.value()
+            ymin = self.graphWidget1.getViewBox().viewRange()[0][0]
+            self.graphWidget1.setXRange(ymin,scroll_value/10,padding=0)
+
+    def VScrollChannel21(self):
+        if self.ispaused1 == 1:
+            scroll_value = self.horizontalScrollBar21.value()
+            ymax = self.graphWidget2.getViewBox().viewRange()[1][0]
+            self.graphWidget2.setXRange(scroll_value/10,ymax,padding=0)
+
+    def VScrollChannel22(self):
+        if self.ispaused1 == 1:
+            scroll_value = self.horizontalScrollBar_22.value()
+            ymin = self.graphWidget2.getViewBox().viewRange()[1][0]
+            self.graphWidget2.setXRange(ymin,scroll_value/10,padding=0)
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
