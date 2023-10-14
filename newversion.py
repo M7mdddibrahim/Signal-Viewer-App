@@ -347,6 +347,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 newplot.data["amplitude"].min(),
                 newplot.data["amplitude"].max(),
             )
+            self.graphWidget1.setMouseEnabled(x=True,y=True)
             self.timer1.stop()
 
     def update_plots2(self):
@@ -397,6 +398,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 newplot.data["amplitude"].min(),
                 newplot.data["amplitude"].max(),
             )
+            self.graphWidget2.setMouseEnabled(x=True,y=True)
             self.timer2.stop()
 
     def zoomInChannel1(self):
