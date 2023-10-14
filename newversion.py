@@ -202,19 +202,19 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer1.start()
 
 
-        def Draw2(self,newplot):
-            pen = newplot.pen
-            newplot.data_line = self.graphWidget2.plot(pen=pen)
-            newplot.index = 0
-            self.horizontalScrollBar.setMinimum(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel2))
-            self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel2))
+    def Draw2(self,newplot):
+        pen = newplot.pen
+        newplot.data_line = self.graphWidget2.plot(pen=pen)
+        newplot.index = 0
+        self.horizontalScrollBar.setMinimum(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel2))
+        self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel2))
 
-            self.timer2 = QtCore.QTimer()
-            self.timer2.setInterval(int(50 / self.signal2speed))
-            self.timer2.timeout.connect(
-                self.update_plots2
-            )  # Connect to a single update method
-            self.timer2.start()
+        self.timer2 = QtCore.QTimer()
+        self.timer2.setInterval(int(50 / self.signal2speed))
+        self.timer2.timeout.connect(
+            self.update_plots2
+        )  # Connect to a single update method
+        self.timer2.start()
 
     def DrawChannel2(self):
         self.load2()
