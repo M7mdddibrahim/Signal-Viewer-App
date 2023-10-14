@@ -105,10 +105,13 @@ class MyWindow(QtWidgets.QMainWindow):
         self.actionChannel4.triggered.connect(self.SnapshotChannel2)
         self.Color1.triggered.connect(self.ChangeColor1)
         self.Color2.triggered.connect(self.ChangeColor2)
+        self.actionRewind1.triggered.connect(self.rewind1)
+        # self.actionRewind2.triggered.connect(self.rewind2)
         self.actionSave_As_PDF.triggered.connect(self.create_pdf_with_qimages)
         self.actionConnect.triggered.connect(self.ConnectGraphs)
         self.horizontalScrollBar.valueChanged.connect(self.ScrollChannel1)
         self.horizontalScrollBar_2.valueChanged.connect(self.ScrollChannel2)
+
         # setting plotting graph color to grey
         pg.setConfigOption("background", "#1f1f1f")
         pd.options.display.max_rows = 999999
@@ -161,8 +164,6 @@ class MyWindow(QtWidgets.QMainWindow):
         self.graphWidget2.setLabel("bottom", "Time")
         self.graphWidget1.setLabel("left", "Amplitude")
         self.graphWidget1.setLabel("bottom", "Time")
-
-
 
 
     def DrawChannel1(self):
@@ -292,6 +293,40 @@ class MyWindow(QtWidgets.QMainWindow):
         else:
             newplot.data_line.show()
             newplot.ishidden = False
+
+    def rewind1(self):
+        if self.timer1.remainingTime() !=0 & self.ispaused1 != 0:
+            self.ispaused1 = 1
+        else:
+            self.clear1()  # Clear the current plot
+            self.DrawChannel1()  # Start plotting from the beginning
+            # self.graphWidget1.clear()
+            # newplot = PlotLines1.pop(len(PlotLines1)-1)
+            # pen = pg.mkPen(color=(255, 0, 0))
+            # name = "Signal" + str(len(PlotLines1))
+            # newplot.data_line = self.graphWidget1.plot(pen=pen, name=name)
+            # self.index = 0
+            # newplot.name = "Signal " + str(len(PlotLines1))
+            # list = []
+            # list.append(newplot.name)
+            # self.comboBox.addItems(list)
+            # self.horizontalScrollBar.setMinimum(int(self.graphWidget1.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel1))
+            # self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel1))
+
+            # self.timer1 = QtCore.QTimer()
+            # self.timer1.setInterval(int(50 / self.signal1speed))
+            # self.timer1.timeout.connect(
+            #     self.update_plots1
+            # )  # Connect to a single update method
+            # self.timer1.start()
+
+
+
+    # def rewind2(self):
+    #     if self.timer1.remainingTime() !=0:
+    #         stop
+    #     else:
+    #         rewind;
 
     def ErrorMsg(self, text):
         msg = QMessageBox()
@@ -867,7 +902,7 @@ class MyWindow(QtWidgets.QMainWindow):
         Value = self.horizontalScrollBar.value()
         self.graphWidget1
 
-    
+
     def ScrollChannel2(self):
         Value = self.horizontalScrollBar_2.value()
 

@@ -50,6 +50,7 @@
             <property name="font">
              <font>
               <pointsize>14</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -113,6 +114,7 @@
             <property name="font">
              <font>
               <pointsize>14</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -259,12 +261,14 @@
    <addaction name="actionPlay_Pause"/>
    <addaction name="actionShow_Hide"/>
    <addaction name="actionmove"/>
+   <addaction name="actionRewind1"/>
    <addaction name="actionseprator"/>
    <addaction name="actionZoomIn2"/>
    <addaction name="actionZoomOut2"/>
    <addaction name="actionPlay_Pause2"/>
    <addaction name="actionHide2"/>
    <addaction name="actionMove2"/>
+   <addaction name="actionrewind2"/>
    <addaction name="actionseprator2"/>
    <addaction name="actionConnect"/>
   </widget>
@@ -520,6 +524,24 @@
    </property>
    <property name="shortcut">
     <string>C, 2</string>
+   </property>
+  </action>
+  <action name="actionRewind1">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons1/rewind1.png</normaloff>../icons1/rewind1.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rewind1</string>
+   </property>
+  </action>
+  <action name="actionrewind2">
+   <property name="icon">
+    <iconset>
+     <normaloff>../icons1/rwind2.png</normaloff>../icons1/rwind2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rewind2</string>
    </property>
   </action>
  </widget>
