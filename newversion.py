@@ -163,6 +163,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.graphWidget1.setLabel("bottom", "Time")
 
 
+
+
     def DrawChannel1(self):
         self.load1()
         newplot = PlotLines1[-1]
