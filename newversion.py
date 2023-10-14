@@ -169,9 +169,9 @@ class MyWindow(QtWidgets.QMainWindow):
     def DrawChannel1(self):
         self.load1()
         newplot = PlotLines1[-1]
-        pen = pg.mkPen(color=(255, 0, 0))
+        newplot.pen = pg.mkPen(color=(255, 0, 0))
         name = "Signal" + str(len(PlotLines1))
-        newplot.data_line = self.graphWidget1.plot(pen=pen, name=name)
+        newplot.data_line = self.graphWidget1.plot(pen=newplot.pen, name=name)
         self.index = 0
         newplot.name = "Signal " + str(len(PlotLines1))
         list = []
@@ -187,12 +187,29 @@ class MyWindow(QtWidgets.QMainWindow):
         )  # Connect to a single update method
         self.timer1.start()
 
+    def Draw1(self,newplot):
+        pen = newplot.pen
+        newplot.data_line = self.graphWidget1.plot(pen=pen)
+        newplot.index = 0
+        # list = []
+        # list.append(newplot.name)
+        # self.comboBox.addItems(list)
+        self.horizontalScrollBar.setMinimum(int(self.graphWidget1.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel1))
+        self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel1))
+
+        self.timer1 = QtCore.QTimer()
+        self.timer1.setInterval(int(50 / self.signal1speed))
+        self.timer1.timeout.connect(
+            self.update_plots1
+        )  # Connect to a single update method
+        self.timer1.start()
+
     def DrawChannel2(self):
         self.load2()
         newplot = PlotLines2[-1]
-        pen = pg.mkPen(color=(255, 0, 0))
+        newplot.pen = pg.mkPen(color=(255, 0, 0))
         name = "Signal" + str(len(PlotLines2))
-        newplot.data_line = self.graphWidget2.plot(pen=pen, name=name)
+        newplot.data_line = self.graphWidget2.plot(pen=newplot.pen, name=name)
         self.index = 0
         newplot.name = "Signal " + str(len(PlotLines2))
         list = []
@@ -295,30 +312,22 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.ishidden = False
 
     def rewind1(self):
-        if self.timer1.remainingTime() !=0 & self.ispaused1 != 0:
+        newplot = self.GetChosenPlotLine1()
+        if newplot == -1 or len(PlotLines1) == 0:
+            self.ErrorMsg("No Signal Chosen")
+            return
+        if self.timer1.isActive() and self.ispaused1 == 0:
             self.ispaused1 = 1
-        else:
-            self.clear1()  # Clear the current plot
-            self.DrawChannel1()  # Start plotting from the beginning
-            # self.graphWidget1.clear()
-            # newplot = PlotLines1.pop(len(PlotLines1)-1)
-            # pen = pg.mkPen(color=(255, 0, 0))
-            # name = "Signal" + str(len(PlotLines1))
-            # newplot.data_line = self.graphWidget1.plot(pen=pen, name=name)
-            # self.index = 0
-            # newplot.name = "Signal " + str(len(PlotLines1))
-            # list = []
-            # list.append(newplot.name)
-            # self.comboBox.addItems(list)
-            # self.horizontalScrollBar.setMinimum(int(self.graphWidget1.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.zoomFactorChannel1))
-            # self.horizontalScrollBar.setMaximum(int(self.zoomFactorChannel1))
+        elif self.timer1.isActive() == False:
+            newplot.data_line.clear()
+            self.Draw1(newplot)
+            self.ispaused1 = 0
 
-            # self.timer1 = QtCore.QTimer()
-            # self.timer1.setInterval(int(50 / self.signal1speed))
-            # self.timer1.timeout.connect(
-            #     self.update_plots1
-            # )  # Connect to a single update method
-            # self.timer1.start()
+            
+        else:
+            self.ispaused1 = 0
+            newplot.data_line.clear()
+            newplot.index = 0
 
 
 
@@ -881,6 +890,7 @@ class MyWindow(QtWidgets.QMainWindow):
             selected_color = color[0]
             r, g, b = map(int, selected_color)  # Extract RGB values
             newplot.data_line.setPen(pg.mkPen(color=(r, g, b)))
+            newplot.pen = pg.mkPen(color=(r, g, b))
         else:
             self.ErrorMsg("No Chosen Color")
 
@@ -895,12 +905,12 @@ class MyWindow(QtWidgets.QMainWindow):
             r, g, b = map(int, selected_color)  # Extract RGB values
 
             newplot.data_line.setPen(pg.mkPen(color=(r, g, b)))
+            newplot.pen = pg.mkPen(color=(r, g, b))
         else:
             self.ErrorMsg("No Chosen Color")
 
     def ScrollChannel1(self):
         Value = self.horizontalScrollBar.value()
-        self.graphWidget1
 
 
     def ScrollChannel2(self):

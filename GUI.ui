@@ -50,7 +50,6 @@
             <property name="font">
              <font>
               <pointsize>14</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -114,7 +113,6 @@
             <property name="font">
              <font>
               <pointsize>14</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -529,7 +527,7 @@
   <action name="actionRewind1">
    <property name="icon">
     <iconset>
-     <normaloff>../icons1/rewind1.png</normaloff>../icons1/rewind1.png</iconset>
+     <normaloff>icons1/rewind1.png</normaloff>icons1/rewind1.png</iconset>
    </property>
    <property name="text">
     <string>Rewind1</string>
@@ -538,7 +536,7 @@
   <action name="actionrewind2">
    <property name="icon">
     <iconset>
-     <normaloff>../icons1/rwind2.png</normaloff>../icons1/rwind2.png</iconset>
+     <normaloff>icons1/rwind2.png</normaloff>icons1/rwind2.png</iconset>
    </property>
    <property name="text">
     <string>Rewind2</string>
