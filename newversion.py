@@ -179,10 +179,9 @@ class MyWindow(QtWidgets.QMainWindow):
         self.load1()
         newplot = PlotLines1[-1]
         newplot.pen = pg.mkPen(color=(255, 0, 0))
-        name = "Signal" + str(len(PlotLines1))
-        newplot.data_line = self.graphWidget1.plot(pen=newplot.pen, name=name)
-        self.index = 0
         newplot.name = "Signal " + str(len(PlotLines1))
+        newplot.data_line = self.graphWidget1.plot(pen=newplot.pen, name=newplot.name)
+        self.index = 0
         list = []
         list.append(newplot.name)
         self.comboBox.addItems(list)
@@ -214,10 +213,9 @@ class MyWindow(QtWidgets.QMainWindow):
         self.load2()
         newplot = PlotLines2[-1]
         newplot.pen = pg.mkPen(color=(255, 0, 0))
-        name = "Signal" + str(len(PlotLines2))
-        newplot.data_line = self.graphWidget2.plot(pen=newplot.pen, name=name)
-        self.index = 0
         newplot.name = "Signal " + str(len(PlotLines2))
+        newplot.data_line = self.graphWidget2.plot(pen=newplot.pen, name=newplot.name)
+        self.index = 0
         list = []
         list.append(newplot.name)
         self.comboBox_2.addItems(list)
@@ -638,12 +636,22 @@ class MyWindow(QtWidgets.QMainWindow):
         list = []
         list.append(newplot.name)
         self.comboBox_2.addItems(list)
-        self.comboBox.removeItem(index + 1)
-        count = self.comboBox.count()
-        for i in range(count):
-            name = "Signal " + str(i+1)
-            PlotLines1[i].data_line.setData(name = name)
-            self.comboBox.setItemText(i+1,name)
+        self.comboBox.clear()
+        self.legend1.clear()
+        list= []
+        list.append("Choose Channel")
+        self.comboBox.addItems(list)
+        i=0
+        for newplot in PlotLines1:
+            if newplot:
+                newplot.name = "Signal " + str(i+1)
+                newplot.data_line.setData(name=newplot.name)
+                list=[]
+                list.append(newplot.name)
+                self.comboBox.addItems(list)
+                self.legend1.addItem(newplot.data_line,name=newplot.name)
+                i += 1
+        # Clear the combo box and then get length and loop for names
         # Update the second graph to ensure the data is plotted
         self.update_plots2()
 
@@ -661,11 +669,10 @@ class MyWindow(QtWidgets.QMainWindow):
         newplot.index = 0
         newplot.ChannelNum = 1
         # Clear the old data in the first graph if needed
-        oldplot.index = 0
+        oldplot.index=0
         index = self.GetChosenIndex2()
         if index != -1:
             PlotLines2.pop(index)
-        for
         x_data = oldplot.data["time"][: oldplot.index + 1]
         y_data = oldplot.data["amplitude"][: oldplot.index + 1]
         oldplot.data_line.setData(x_data, y_data)
@@ -673,9 +680,25 @@ class MyWindow(QtWidgets.QMainWindow):
         list = []
         list.append(newplot.name)
         self.comboBox.addItems(list)
-        self.comboBox_2.removeItem(index + 1)
+        self.comboBox_2.clear()
+        self.legend2.clear()
+        list= []
+        list.append("Choose Channel")
+        self.comboBox_2.addItems(list)
+        i=0
+        for newplot in PlotLines2:
+            if newplot:
+                newplot.name = "Signal " + str(i+1)
+                newplot.data_line.setData(name=newplot.name)
+                list=[]
+                list.append(newplot.name)
+                self.comboBox.addItems(list)
+                self.legend2.addItem(newplot.data_line,name=newplot.name)
+                i += 1
+        # Clear the combo box and then get length and loop for names
         # Update the second graph to ensure the data is plotted
         self.update_plots1()
+
 
     def ConnectGraphs(self):
         if self.connect_status:
