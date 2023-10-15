@@ -26,6 +26,7 @@ from PIL import Image as PILImage
 import PIL
 import tempfile
 from fpdf import FPDF
+import random
 
 
 class InputDialog(QtWidgets.QDialog):
@@ -177,8 +178,9 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def DrawChannel1(self):
         self.load1()
+        random_rgb = self.random_color()
         newplot = PlotLines1[-1]
-        newplot.pen = pg.mkPen(color=(255, 0, 0))
+        newplot.pen = pg.mkPen(color = random_rgb)
         newplot.name = "Signal " + str(len(PlotLines1))
         newplot.data_line = self.graphWidget1.plot(pen=newplot.pen, name=newplot.name)
         self.index = 0
@@ -194,6 +196,13 @@ class MyWindow(QtWidgets.QMainWindow):
             self.update_plots1
         )  # Connect to a single update method
         self.timer1.start()
+
+    def random_color(self):
+        red = random.randint(0,255)
+        green = random.randint(0,255)
+        blue = random.randint(0,255)
+        
+        return (red,green,blue)
 
     def Draw1(self,newplot):
         pen = newplot.pen
@@ -211,8 +220,9 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def DrawChannel2(self):
         self.load2()
+        random_rgb = self.random_color()
         newplot = PlotLines2[-1]
-        newplot.pen = pg.mkPen(color=(255, 0, 0))
+        newplot.pen = pg.mkPen(color = random_rgb)
         newplot.name = "Signal " + str(len(PlotLines2))
         newplot.data_line = self.graphWidget2.plot(pen=newplot.pen, name=newplot.name)
         self.index = 0
@@ -398,6 +408,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer1.start()
         # Connect to a single update method
         if self.ispaused1 == 0:
+            self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = self.Xmax1, yMin = self.Ymin1, yMax = self.Ymax1)
+            global newplot
             for newplot in PlotLines1:
                 if newplot.isstopped == False:
                     if newplot.index < len(newplot.data):
@@ -420,7 +432,7 @@ class MyWindow(QtWidgets.QMainWindow):
                         )
                         newplot.index += 1
         elif self.ispaused1 == 1:
-            pass
+            self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = newplot.data["time"][newplot.index])
             # Check if all data is plotted; if so, stop the timer
         if len(PlotLines1) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
@@ -443,6 +455,8 @@ class MyWindow(QtWidgets.QMainWindow):
         )  # Connect to a single update method
         self.timer2.start()
         if self.ispaused2 == 0:
+            self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = self.Xmax2, yMin = self.Ymin2, yMax = self.Ymax2)
+            global newplot
             for newplot in PlotLines2:
                 if newplot.isstopped == False:
                     if newplot.index < len(newplot.data):
@@ -466,7 +480,7 @@ class MyWindow(QtWidgets.QMainWindow):
 
                         newplot.index += 1
         elif self.ispaused2 == 1:
-            pass
+            self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = newplot.data["time"][newplot.index])
         if len(PlotLines2) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines2):
                 self.graphWidget2.setXRange(
