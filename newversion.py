@@ -372,13 +372,13 @@ class MyWindow(QtWidgets.QMainWindow):
         if newplot == -1 or len(PlotLines2) == 0:
             self.ErrorMsg("No Signal Chosen")
             return
-        if self.timer2.isActive() and self.ispaused2 == 0:
-            self.ispaused2 = 1
+        if self.timer2.isActive() and newplot.isstopped == False:
+            newplot.isstopped = True
         elif self.timer2.isActive() == False:
             self.Draw2(newplot)
-            self.ispaused2 = 0
+            newplot.isstopped = False
         else:
-            self.ispaused2 = 0
+            newplot.isstopped = False
             newplot.index = 0
 
 
@@ -444,6 +444,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer2.start()
         if self.ispaused2 == 0:
             for newplot in PlotLines2:
+                if newplot.isstopped == False:
                     if newplot.index < len(newplot.data):
                         x_data = newplot.data["time"][: newplot.index + 1]
                         y_data = (
@@ -692,7 +693,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 newplot.data_line.setData(name=newplot.name)
                 list=[]
                 list.append(newplot.name)
-                self.comboBox.addItems(list)
+                self.comboBox_2.addItems(list)
                 self.legend2.addItem(newplot.data_line,name=newplot.name)
                 i += 1
         # Clear the combo box and then get length and loop for names
