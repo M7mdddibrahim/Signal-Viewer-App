@@ -144,8 +144,6 @@ class MyWindow(QtWidgets.QMainWindow):
         self.ispaused2 = 0
         self.signal1speed = 1
         self.signal2speed = 1
-        self.actionmove.triggered.connect(self.Move1)
-        self.actionMove2.triggered.connect(self.Move2)
         self.data_moved = False
         self.snapshots1 = []
         self.snapshots2 = []
@@ -384,7 +382,7 @@ class MyWindow(QtWidgets.QMainWindow):
                     x_data = newplot.data["time"][: newplot.index + 1]
                     y_data = (
                         newplot.data["amplitude"][: newplot.index + 1]
-                        # * self.zoomFactorChannel1
+
                     )
                     newplot.data_line.setData(x_data, y_data)
                     self.graphWidget1.setXRange(
@@ -392,8 +390,7 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
-                    # self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
-                    # self.horizontalScrollBar.setValue(int((self.graphWidget1.getViewBox().viewRange()[0][0]/newplot.data["time"].max())*self.Xmax1*10))
+                    self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
 
                     self.graphWidget1.setYRange(
                         newplot.data["amplitude"][newplot.index],
@@ -538,16 +535,15 @@ class MyWindow(QtWidgets.QMainWindow):
             return
         newplot = PLotLine()
         newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
-        pen = pg.mkPen(color=(255, 0, 0))
-        name = "Signal" + str(len(PlotLines2))
-        newplot.data_line = self.graphWidget2.plot(pen=pen, name=name)
-        # Make sure the data is within the visible range of the second graph
-        self.graphWidget2.setXRange(newplot.data["time"].min(), newplot.data["time"].max())
+        newplot.pen = oldplot.pen
         PlotLines2.append(newplot)
+        newplot.name = "Signal" + str(len(PlotLines2))
+        newplot.data_line = self.graphWidget2.plot(pen=newplot.pen,name=newplot.name)
         newplot.index = 0
         newplot.ChannelNum = 2
         # Clear the old data in the first graph if needed
         oldplot.data_line.clear()
+        oldplot.index=0
         # Update the second graph to ensure the data is plotted
         self.update_plots2()
 
