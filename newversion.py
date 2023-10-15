@@ -201,7 +201,7 @@ class MyWindow(QtWidgets.QMainWindow):
         newplot.data_line = self.graphWidget1.plot(pen=pen)
         newplot.index = 0
         self.horizontalScrollBar.setMinimum(0)
-        self.horizontalScrollBar.setMaximum(self.Xmax1*10)
+        self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
 
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
@@ -209,21 +209,6 @@ class MyWindow(QtWidgets.QMainWindow):
             self.update_plots1
         )  # Connect to a single update method
         self.timer1.start()
-
-
-    def Draw2(self,newplot):
-        pen = newplot.pen
-        newplot.data_line = self.graphWidget2.plot(pen=pen)
-        newplot.index = 0
-        self.horizontalScrollBar_2.setMinimum(0)
-        self.horizontalScrollBar_2.setMaximum(self.Xmax2*10)
-
-        self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(int(50 / self.signal2speed))
-        self.timer2.timeout.connect(
-            self.update_plots2
-        )  # Connect to a single update method
-        self.timer2.start()
 
     def DrawChannel2(self):
         self.load2()
@@ -236,6 +221,20 @@ class MyWindow(QtWidgets.QMainWindow):
         list = []
         list.append(newplot.name)
         self.comboBox_2.addItems(list)
+        self.horizontalScrollBar_2.setMinimum(0)
+        self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
+
+        self.timer2 = QtCore.QTimer()
+        self.timer2.setInterval(int(50 / self.signal2speed))
+        self.timer2.timeout.connect(
+            self.update_plots2
+        )  # Connect to a single update method
+        self.timer2.start()
+
+    def Draw2(self,newplot):
+        pen = newplot.pen
+        newplot.data_line = self.graphWidget2.plot(pen=pen)
+        newplot.index = 0
         self.horizontalScrollBar_2.setMinimum(0)
         self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
 
@@ -342,7 +341,7 @@ class MyWindow(QtWidgets.QMainWindow):
         elif self.timer1.isActive() == False:
             newplot.data_line.clear()
             self.Draw1(newplot)
-            self.ispaused1 = 0   
+            self.ispaused1 = 0
         else:
             self.ispaused1 = 0
             newplot.data_line.clear()
@@ -358,7 +357,7 @@ class MyWindow(QtWidgets.QMainWindow):
         elif self.timer2.isActive() == False:
             newplot.data_line.clear()
             self.Draw2(newplot)
-            self.ispaused2 = 0   
+            self.ispaused2 = 0
         else:
             self.ispaused2 = 0
             newplot.data_line.clear()
@@ -393,8 +392,8 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
-                    self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
-                    self.horizontalScrollBar.setValue(int((self.graphWidget1.getViewBox().viewRange()[0][0]/newplot.data["time"].max())*self.Xmax1*10))
+                    # self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
+                    # self.horizontalScrollBar.setValue(int((self.graphWidget1.getViewBox().viewRange()[0][0]/newplot.data["time"].max())*self.Xmax1*10))
 
                     self.graphWidget1.setYRange(
                         newplot.data["amplitude"][newplot.index],
@@ -405,7 +404,6 @@ class MyWindow(QtWidgets.QMainWindow):
                     newplot.index += 1
         elif self.ispaused1 == 1:
             pass
-
             # Check if all data is plotted; if so, stop the timer
         if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
             self.graphWidget1.setXRange(
@@ -426,7 +424,6 @@ class MyWindow(QtWidgets.QMainWindow):
             self.update_plots2
         )  # Connect to a single update method
         self.timer2.start()
-
         if self.ispaused2 == 0:
             for newplot in PlotLines2:
                 if newplot.index < len(newplot.data):
@@ -441,9 +438,9 @@ class MyWindow(QtWidgets.QMainWindow):
                         newplot.data["time"][newplot.index],
                         padding=0,
                     )
-                    self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
-                    self.horizontalScrollBar_2.setValue(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.Xmax2*10))
-                    
+                    # self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
+                    # self.horizontalScrollBar_2.setValue(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.Xmax2*10))
+
                     self.graphWidget2.setYRange(
                         newplot.data["amplitude"][newplot.index],
                         newplot.data["amplitude"][newplot.index],
@@ -704,7 +701,7 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def SnapshotChannel1(self):
         # Capture the content of the graphWidget1 widget
-        pixmap = self.graphWidget1.grab()
+        pixmap = self.graphWidget1.grab() #eh pixmapp dyh
         image = pixmap.toImage()
         snapshots1.append(image)
         image.save("snapshot_channel1" + str(len(snapshots1)) + ".png")
@@ -898,7 +895,7 @@ class MyWindow(QtWidgets.QMainWindow):
 
             # Update the horizontal scroll bar range and value
             self.horizontalScrollBar.setRange(0, int(self.Xmax1))
-            self.horizontalScrollBar.setValue(scroll_value)     
+            self.horizontalScrollBar.setValue(scroll_value)
 
     def ScrollChannel2(self):
         if self.ispaused2 == 1:
@@ -915,8 +912,8 @@ class MyWindow(QtWidgets.QMainWindow):
 
             # Update the horizontal scroll bar range and value
             self.horizontalScrollBar_2.setRange(0, int(self.Xmax2))
-            self.horizontalScrollBar_2.setValue(scroll_value) 
-        
+            self.horizontalScrollBar_2.setValue(scroll_value)
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
