@@ -58,6 +58,7 @@ class PLotLine:
         self.name = None
         self.ishidden = False
         self.ChannelNum = None
+        self.moved = False
         # self.timer
 
 
@@ -161,9 +162,9 @@ class MyWindow(QtWidgets.QMainWindow):
         self.Xmin1 = self.Xmin2 = 0.0
         self.Ymin1 = self.Ymin2 = float('inf')
         self.Xmax1 = self.Xmax2 = self.Ymax1 = self.Ymax2 = float('-inf')
-        self.graphWidget1.addLegend()
+        self.legend1 = self.graphWidget1.addLegend()
         self.graphWidget1.showGrid(x=True,y=True)
-        self.graphWidget2.addLegend()
+        self.legend2 = self.graphWidget2.addLegend()
         self.graphWidget2.showGrid(x=True,y=True)
         self.graphWidget1.setLimits(xMin=0)
         self.graphWidget2.setLimits(xMin=0)
@@ -337,12 +338,10 @@ class MyWindow(QtWidgets.QMainWindow):
         if self.timer1.isActive() and self.ispaused1 == 0:
             self.ispaused1 = 1
         elif self.timer1.isActive() == False:
-            newplot.data_line.clear()
             self.Draw1(newplot)
             self.ispaused1 = 0
         else:
             self.ispaused1 = 0
-            newplot.data_line.clear()
             newplot.index = 0
 
     def rewind2(self):
@@ -353,12 +352,10 @@ class MyWindow(QtWidgets.QMainWindow):
         if self.timer2.isActive() and self.ispaused2 == 0:
             self.ispaused2 = 1
         elif self.timer2.isActive() == False:
-            newplot.data_line.clear()
             self.Draw2(newplot)
             self.ispaused2 = 0
         else:
             self.ispaused2 = 0
-            newplot.data_line.clear()
             newplot.index = 0
 
     def ErrorMsg(self, text):
@@ -382,7 +379,6 @@ class MyWindow(QtWidgets.QMainWindow):
                     x_data = newplot.data["time"][: newplot.index + 1]
                     y_data = (
                         newplot.data["amplitude"][: newplot.index + 1]
-
                     )
                     newplot.data_line.setData(x_data, y_data)
                     self.graphWidget1.setXRange(
@@ -402,17 +398,18 @@ class MyWindow(QtWidgets.QMainWindow):
         elif self.ispaused1 == 1:
             pass
             # Check if all data is plotted; if so, stop the timer
-        if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
-            self.graphWidget1.setXRange(
-                newplot.data["time"][0],
-                newplot.data["time"][len(newplot.data["time"]) - 1],
-            )
-            self.horizontalScrollBar.setMaximum(0)
-            self.graphWidget1.setYRange(
-                newplot.data["amplitude"].min(),
-                newplot.data["amplitude"].max(),
-            )
-            self.timer1.stop()
+        if len(PlotLines1) > 0:
+            if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
+                self.graphWidget1.setXRange(
+                    newplot.data["time"][0],
+                    newplot.data["time"][len(newplot.data["time"]) - 1],
+                )
+                self.horizontalScrollBar.setMaximum(0)
+                self.graphWidget1.setYRange(
+                    newplot.data["amplitude"].min(),
+                    newplot.data["amplitude"].max(),
+                )
+                self.timer1.stop()
 
     def update_plots2(self):
         self.timer2 = QtCore.QTimer()
@@ -423,41 +420,40 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer2.start()
         if self.ispaused2 == 0:
             for newplot in PlotLines2:
-                if newplot.index < len(newplot.data):
-                    x_data = newplot.data["time"][: newplot.index + 1]
-                    y_data = (
-                        newplot.data["amplitude"][: newplot.index + 1]
-                        # * self.zoomFactorChannel2
-                    )
-                    newplot.data_line.setData(x_data, y_data)
-                    self.graphWidget2.setXRange(
-                        newplot.data["time"][newplot.index],
-                        newplot.data["time"][newplot.index],
-                        padding=0,
-                    )
-                    # self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
-                    # self.horizontalScrollBar_2.setValue(int(self.graphWidget2.getViewBox().viewRange()[0][1]/newplot.data["time"].max()*self.Xmax2*10))
+                    if newplot.index < len(newplot.data):
+                        x_data = newplot.data["time"][: newplot.index + 1]
+                        y_data = (
+                            newplot.data["amplitude"][: newplot.index + 1]
+                        )
+                        newplot.data_line.setData(x_data, y_data)
+                        self.graphWidget2.setXRange(
+                            newplot.data["time"][newplot.index],
+                            newplot.data["time"][newplot.index],
+                            padding=0,
+                        )
+                        self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
 
-                    self.graphWidget2.setYRange(
-                        newplot.data["amplitude"][newplot.index],
-                        newplot.data["amplitude"][newplot.index],
-                        padding=0,
-                    )
+                        self.graphWidget2.setYRange(
+                            newplot.data["amplitude"][newplot.index],
+                            newplot.data["amplitude"][newplot.index],
+                            padding=0,
+                        )
 
-                    newplot.index += 1
+                        newplot.index += 1
         elif self.ispaused2 == 1:
             pass
-        if all(newplot.index >= len(newplot.data) for newplot in PlotLines2):
-            self.graphWidget2.setXRange(
-                newplot.data["time"][0],
-                newplot.data["time"][len(newplot.data["time"]) - 1],
-            )
-            self.horizontalScrollBar_2.setMaximum(0)
-            self.graphWidget2.setYRange(
-                newplot.data["amplitude"].min(),
-                newplot.data["amplitude"].max(),
-            )
-            self.timer2.stop()
+        if len(PlotLines2) > 0:
+            if all(newplot.index >= len(newplot.data) for newplot in PlotLines2):
+                self.graphWidget2.setXRange(
+                    newplot.data["time"][0],
+                    newplot.data["time"][len(newplot.data["time"]) - 1],
+                )
+                self.horizontalScrollBar_2.setMaximum(0)
+                self.graphWidget2.setYRange(
+                    newplot.data["amplitude"].min(),
+                    newplot.data["amplitude"].max(),
+                )
+                self.timer2.stop()
 
     def zoomInChannel1(self):
         viewbox = self.graphWidget1.getViewBox()
@@ -542,8 +538,18 @@ class MyWindow(QtWidgets.QMainWindow):
         newplot.index = 0
         newplot.ChannelNum = 2
         # Clear the old data in the first graph if needed
-        oldplot.data_line.clear()
         oldplot.index=0
+        index = self.GetChosenIndex1()
+        if index != -1:
+            PlotLines1.pop(index)
+        x_data = oldplot.data["time"][: oldplot.index + 1]
+        y_data = oldplot.data["amplitude"][: oldplot.index + 1]
+        oldplot.data_line.setData(x_data, y_data)
+        self.legend1.removeItem(oldplot.data_line)
+        list = []
+        list.append(newplot.name)
+        self.comboBox_2.addItems(list)
+        self.comboBox.removeItem(index + 1)
         # Update the second graph to ensure the data is plotted
         self.update_plots2()
 
@@ -553,18 +559,27 @@ class MyWindow(QtWidgets.QMainWindow):
             self.ErrorMsg("No Signal Chosen")
             return
         newplot = PLotLine()
-        newplot.data = oldplot.data  # Copy the data from the second plot to the new plot
-        pen = pg.mkPen(color=(255, 0, 0))
-        name = "Signal" + str(len(PlotLines1))
-        newplot.data_line = self.graphWidget1.plot(pen=pen, name=name)
-        # Make sure the data is within the visible range of the first graph
-        self.graphWidget1.setXRange(newplot.data["time"].min(), newplot.data["time"].max())
+        newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
+        newplot.pen = oldplot.pen
         PlotLines1.append(newplot)
+        newplot.name = "Signal" + str(len(PlotLines1))
+        newplot.data_line = self.graphWidget1.plot(pen=newplot.pen,name=newplot.name)
         newplot.index = 0
         newplot.ChannelNum = 1
-        # Clear the old data in the second graph if needed
-        oldplot.data_line.clear()
-        # Update the first graph to ensure the data is plotted
+        # Clear the old data in the first graph if needed
+        oldplot.index = 0
+        index = self.GetChosenIndex2()
+        if index != -1:
+            PlotLines2.pop(index)
+        x_data = oldplot.data["time"][: oldplot.index + 1]
+        y_data = oldplot.data["amplitude"][: oldplot.index + 1]
+        oldplot.data_line.setData(x_data, y_data)
+        self.legend2.removeItem(oldplot.data_line)
+        list = []
+        list.append(newplot.name)
+        self.comboBox.addItems(list)
+        self.comboBox_2.removeItem(index + 1)
+        # Update the second graph to ensure the data is plotted
         self.update_plots1()
 
     def ConnectGraphs(self):
@@ -843,6 +858,20 @@ class MyWindow(QtWidgets.QMainWindow):
         Index = self.comboBox_2.currentIndex()
         if Index != 0:
             return PlotLines2[Index - 1]
+        else:
+            return -1
+        
+    def GetChosenIndex1(self):
+        Index = self.comboBox.currentIndex()
+        if Index != 0:
+            return Index - 1
+        else:
+            return -1
+    
+    def GetChosenIndex2(self):
+        Index = self.comboBox_2.currentIndex()
+        if Index != 0:
+            return Index -1
         else:
             return -1
 
