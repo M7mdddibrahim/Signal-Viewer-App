@@ -61,6 +61,12 @@ class PLotLine:
         self.ChannelNum = None
         self.moved = False
         self.isstopped = False
+        self.maxmiumTime=0
+        self.minimumAmplitude=0
+        self.maxmiumAmplitude=0
+        self.timeMean=0
+        self.amplitudeMean=0
+        self.data=[]
         # self.timer
 
 
@@ -870,115 +876,152 @@ class MyWindow(QtWidgets.QMainWindow):
         msg.exec_()
 
     def create_pdf_with_qimages(self):
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font(
-            "Arial",
-            size=10,
-        )
-        pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
-        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2))
-        i = 0
-        while i < len(snapshots1):
-            image_width = 50  # Set the desired image width
-            image_height = 50  # Set the desired image height
-            page_width = pdf.w - 2 * pdf.l_margin
-            page_height = pdf.h - 2 * pdf.t_margin
-
-            x = (page_width - image_width) / 2
-            y = (page_height - image_height) / 2
-            pdf.image(
-                "snapshot_channel1" + str(i + 1) + ".png",
-                x=(x * i),
-                y=90,
-                w=image_width,
-                h=image_height,
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font(
+                "Arial",
+                size=10,
             )
-            i += 1
-        c = 0
-        while c < len(snapshots2):
-            image_width = 50  # Set the desired image width
-            image_height = 50  # Set the desired image height
-            page_width = pdf.w - 2 * pdf.l_margin
-            page_height = pdf.h - 2 * pdf.t_margin
+            pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
+            mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2))
+            i = 0
+            while i < len(snapshots1):
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
 
-            x = (page_width - image_width) / 2
-            y = (page_height - image_height) / 2
-            pdf.image(
-                "snapshot_channel2" + str(c + 1) + ".png",
-                x=(x * c),
-                y=150,
-                w=image_width,
-                h=image_height,
-            )
-            c += 1
-        self.channelstatistics()
-        data = [
-            [
-                "Channel 1 time mean",
-                "Channel 2 time mean",
-                "Channel 1 amplitude mean",
-                "Channel 2 amplitude mean",
-            ],  # 'testing','size'],
-            [
-                self.time_mean1,
-                self.time_mean2,
-                self.amplitude_mean1,
-                self.amplitude_mean2,
-            ],  # 'testing','size'],
-        ]
-        Data = [
-            [
-                "Channel 1 max time",
-                "Channel 2 max time",
-                "Channel 1 min time",
-                "Channel 2 min time",
-            ],  # 'testing','size'],
-            [
-                self.max1,
-                self.max2,
-                self.min1,
-                self.min2,
-            ],  # 'testing','size'],
-        ]
-        col_width = pdf.w / 4.5
-        row_height = 20
+                x = ((page_width - image_width) / 2)+10
+                y = (page_height - image_height) / 2
+                pdf.image(
+                    "snapshot_channel1" + str(i + 1) + ".png",
+                    x=(x * i),
+                    y=30,
+                    w=image_width,
+                    h=image_height,
+                )
+                i += 1
+            c = 0
+            while c < len(snapshots2):
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
 
-        pdf.set_y(25)
-        # Add a table at the bottom
-        for row in data:
-            for item in row:
-                pdf.cell(col_width, row_height, str(item), border=1, ln=False)
-            pdf.ln(row_height)
-        # Calculate the vertical position (y) to align at the bottom
-        y = pdf.h - 10 - pdf.b_margin - len(data) * row_height
-        pdf.set_y(y)
-        for row in Data:
-            for item in row:
-                pdf.cell(col_width, row_height, str(item), border=1, ln=False)
-            pdf.ln(row_height)
+                x = ((page_width - image_width) / 2)+10
+                y = (page_height - image_height) / 2
+                pdf.image(
+                    "snapshot_channel2" + str(c + 1) + ".png",
+                    x=(x * c),
+                    y=90,
+                    w=image_width,
+                    h=image_height,
+                )
+                c += 1
+            self.channelstatistics()
+            data = [
+                [
+                    "Channel 1 time mean",
+                    "Channel 2 time mean",
+                    "Channel 1 amplitude mean",
+                    "Channel 2 amplitude mean",
+                ],  # 'testing','size'],
+                [
+                    self.time_mean1,
+                    self.time_mean2,
+                    self.amplitude_mean1,
+                    self.amplitude_mean2,
+                ],  # 'testing','size'],
+            ]
+            Data = [
+                [
+                    "Channel 1 max time",
+                    "Channel 2 max time",
+                    "Channel 1 min time",
+                    "Channel 2 min time",
+                ],  # 'testing','size'],
+                [
+                    self.max1,
+                    self.max2,
+                    self.min1,
+                    self.min2,
+                ],  # 'testing','size'],
+            ]
+            i=0
+            for plotline1 in PlotLines1:
+                i+=1
+                plotline1.data=[
+                    [
+                    "Signal "+str(i)+" "+"time mean",
+                    "Signal "+str(i)+" "+"amplitude mean",
+                    "Signal "+str(i)+" "+"maximum time",
+                    "Signal "+str(i)+" "+"maximum amplitude",
 
-        pdf.output(mypdf)
+                    ],
+                    [
+                        plotline1.timeMean,
+                        plotline1.amplitudeMean,
+                        plotline1.maxmiumTime,
+                        plotline1.maxmiumAmplitude,
+                    ]
+                ]
+                x=0
+                for plotline2 in PlotLines2:
+                    x+=1
+                    plotline2.data=[
+                        [
+                        "Signal "+str(i)+" "+"time mean",
+                        "Signal "+str(i)+" "+"amplitude mean",
+                        "Signal "+str(i)+" "+"maximum time",
+                        "Signal "+str(i)+" "+"maximum amplitude",
+
+                        ],
+                        [
+                            plotline2.timeMean,
+                            plotline2.amplitudeMean,
+                            plotline2.maxmiumTime,
+                            plotline2.maxmiumAmplitude,
+                        ]
+                    ]
+                
+            col_width = pdf.w / 4.5
+            row_height = 20
+
+            pdf.set_y(170)
+            x=170
+            # Add a table at the bottom
+            for plotline1 in PlotLines1:
+                
+                x+=60
+                for row in plotline1.data:
+                    for item in row:
+                        pdf.cell(col_width, row_height, str(item), border=1, ln=False)
+                    pdf.ln(row_height)
+                pdf.set_y(x)
+        
+
+            pdf.output(mypdf)
 
     def channelstatistics(self):
-        channel1plot = PlotLines1[-1]
-        channel2plot = PlotLines2[-1]
-        self.channel1_time_sum = channel1plot.data["time"].sum()
-        self.channel1_amplitude_sum = channel1plot.data["amplitude"].sum()
-        self.channel2_time_sum = channel2plot.data["time"].sum()
-        self.channel2_amplitude_sum = channel2plot.data["amplitude"].sum()
-        self.time_mean1 = self.channel1_time_sum / len(channel1plot.data["time"])
-        self.time_mean2 = self.channel1_time_sum / len(channel2plot.data["time"])
-        self.amplitude_mean1 = self.channel1_amplitude_sum / len(
-            channel1plot.data["amplitude"]
-        )
-        self.amplitude_mean2 = self.channel2_amplitude_sum / len(
-            channel2plot.data["amplitude"]
-        )
-        self.max1 = channel1plot.data["time"].max()
-        self.max2 = channel2plot.data["time"].max()
-        self.min1 = channel1plot.data["time"].min()
-        self.min2 = channel2plot.data["time"].min()
+            signalnumbers_1=len(PlotLines1)
+            signalnumbers_2=len(PlotLines2)
+            for plotline1 in PlotLines1:
+                timesum= plotline1.data["time"].sum()
+                amplitude_sum=plotline1.data["amplitude"].sum()
+                plotline1.timeMean=timesum/len(plotline1.data["time"])
+                plotline1.amplitudeMean=amplitude_sum/len(plotline1.data["amplitude"])
+                plotline1.maxmiumAmplitude=plotline1.data["amplitude"].max()
+                plotline1.minimumAmplitude=plotline1.data["amplitude"].min()
+                plotline1.maxmiumTime=plotline1.data["time"].max()
+            
+            for plotline2 in PlotLines2:
+                timesum= plotline2.data["time"].sum()
+                amplitude_sum=plotline2.data["amplitude"].sum()
+                plotline2.timeMean=timesum/len(plotline2.data["time"])
+                plotline2.amplitudeMean=amplitude_sum/len(plotline2.data["amplitude"])
+                plotline2.maxmiumAmplitude=plotline2.data["amplitude"].max()
+                plotline2.minimumAmplitude=plotline2.data["amplitude"].min()
+                plotline2.maxmiumTime=plotline2.data["time"].max()
 
     def GetChosenPlotLine1(self):
         Index = self.comboBox.currentIndex()
