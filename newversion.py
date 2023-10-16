@@ -876,131 +876,118 @@ class MyWindow(QtWidgets.QMainWindow):
         msg.exec_()
 
     def create_pdf_with_qimages(self):
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font(
-                "Arial",
-                size=10,
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font(
+            "Arial",
+            size=10,
+        )
+        pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
+        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2))
+        i = 0
+        while i < len(snapshots1):
+            image_width = 50  # Set the desired image width
+            image_height = 50  # Set the desired image height
+            page_width = pdf.w - 2 * pdf.l_margin
+            page_height = pdf.h - 2 * pdf.t_margin
+
+            x = ((page_width - image_width) / 2)+10
+            y = (page_height - image_height) / 2
+            pdf.image(
+                "snapshot_channel1" + str(i + 1) + ".png",
+                x=(x * i),
+                y=30,
+                w=image_width,
+                h=image_height,
             )
-            pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
-            mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2))
-            i = 0
-            while i < len(snapshots1):
-                image_width = 50  # Set the desired image width
-                image_height = 50  # Set the desired image height
-                page_width = pdf.w - 2 * pdf.l_margin
-                page_height = pdf.h - 2 * pdf.t_margin
+            i += 1
+        c = 0
+        while c < len(snapshots2):
+            image_width = 50  # Set the desired image width
+            image_height = 50  # Set the desired image height
+            page_width = pdf.w - 2 * pdf.l_margin
+            page_height = pdf.h - 2 * pdf.t_margin
 
-                x = ((page_width - image_width) / 2)+10
-                y = (page_height - image_height) / 2
-                pdf.image(
-                    "snapshot_channel1" + str(i + 1) + ".png",
-                    x=(x * i),
-                    y=30,
-                    w=image_width,
-                    h=image_height,
-                )
-                i += 1
-            c = 0
-            while c < len(snapshots2):
-                image_width = 50  # Set the desired image width
-                image_height = 50  # Set the desired image height
-                page_width = pdf.w - 2 * pdf.l_margin
-                page_height = pdf.h - 2 * pdf.t_margin
+            x = ((page_width - image_width) / 2)+10
+            y = (page_height - image_height) / 2
+            pdf.image(
+                "snapshot_channel2" + str(c + 1) + ".png",
+                x=(x * c),
+                y=90,
+                w=image_width,
+                h=image_height,
+            )
+            c += 1
+        self.channelstatistics()
+        i=0
+        for plotline1 in PlotLines1:
+            i+=1
+            plotline1.data=[
+                [
+                 "Signal "+str(i)+" "+"time mean",
+                 "Signal "+str(i)+" "+"amplitude mean",
+                 "Signal "+str(i)+" "+"maximum time",
+                 "Signal "+str(i)+" "+"maximum amplitude",
 
-                x = ((page_width - image_width) / 2)+10
-                y = (page_height - image_height) / 2
-                pdf.image(
-                    "snapshot_channel2" + str(c + 1) + ".png",
-                    x=(x * c),
-                    y=90,
-                    w=image_width,
-                    h=image_height,
-                )
-                c += 1
-            self.channelstatistics()
-            data = [
+                ],
                 [
-                    "Channel 1 time mean",
-                    "Channel 2 time mean",
-                    "Channel 1 amplitude mean",
-                    "Channel 2 amplitude mean",
-                ],  # 'testing','size'],
-                [
-                    self.time_mean1,
-                    self.time_mean2,
-                    self.amplitude_mean1,
-                    self.amplitude_mean2,
-                ],  # 'testing','size'],
-            ]
-            Data = [
-                [
-                    "Channel 1 max time",
-                    "Channel 2 max time",
-                    "Channel 1 min time",
-                    "Channel 2 min time",
-                ],  # 'testing','size'],
-                [
-                    self.max1,
-                    self.max2,
-                    self.min1,
-                    self.min2,
-                ],  # 'testing','size'],
-            ]
-            i=0
-            for plotline1 in PlotLines1:
-                i+=1
-                plotline1.data=[
-                    [
-                    "Signal "+str(i)+" "+"time mean",
-                    "Signal "+str(i)+" "+"amplitude mean",
-                    "Signal "+str(i)+" "+"maximum time",
-                    "Signal "+str(i)+" "+"maximum amplitude",
-
-                    ],
-                    [
-                        plotline1.timeMean,
-                        plotline1.amplitudeMean,
-                        plotline1.maxmiumTime,
-                        plotline1.maxmiumAmplitude,
-                    ]
+                    plotline1.timeMean,
+                    plotline1.amplitudeMean,
+                    plotline1.maxmiumTime,
+                    plotline1.maxmiumAmplitude,
                 ]
-                x=0
-                for plotline2 in PlotLines2:
-                    x+=1
-                    plotline2.data=[
-                        [
-                        "Signal "+str(i)+" "+"time mean",
-                        "Signal "+str(i)+" "+"amplitude mean",
-                        "Signal "+str(i)+" "+"maximum time",
-                        "Signal "+str(i)+" "+"maximum amplitude",
+            ]
+            y=0
+            for plotline2 in PlotLines2:
+             y+=1
+             plotline2.data=[
+                [
+                 "Signal "+str(y)+" "+"time mean",
+                 "Signal "+str(y)+" "+"amplitude mean",
+                 "Signal "+str(y)+" "+"maximum time",
+                 "Signal "+str(y)+" "+"maximum amplitude",
 
-                        ],
-                        [
-                            plotline2.timeMean,
-                            plotline2.amplitudeMean,
-                            plotline2.maxmiumTime,
-                            plotline2.maxmiumAmplitude,
-                        ]
-                    ]
-                
-            col_width = pdf.w / 4.5
-            row_height = 20
+                ],
+                [
+                    plotline2.timeMean,
+                    plotline2.amplitudeMean,
+                    plotline2.maxmiumTime,
+                    plotline2.maxmiumAmplitude,
+                ]
+            ]
+        pdf.set_y(150)
+        pdf.cell(200, 5, align="C", txt="Plot widget 1 Signals Statistics", ln=True)
+        col_width = pdf.w / 4.5
+        row_height = 20
 
-            pdf.set_y(170)
-            x=170
-            # Add a table at the bottom
-            for plotline1 in PlotLines1:
-                
-                x+=60
-                for row in plotline1.data:
-                    for item in row:
-                        pdf.cell(col_width, row_height, str(item), border=1, ln=False)
-                    pdf.ln(row_height)
-                pdf.set_y(x)
-        
+        pdf.set_y(170)
+        x=170
+        # Add a table at the bottom
+        for plotline1 in PlotLines1:
+            
+            x+=60
+            for row in plotline1.data:
+                for item in row:
+                    pdf.cell(col_width, row_height, str(item), border=1, ln=False)
+                pdf.ln(row_height)
+            pdf.set_y(x)
+        x-=280
+        pdf.set_y(x)
+        pdf.cell(200, 5, align="C", txt="Plot widget 2 Signals Statistics", ln=True)
+        x+=20
+        pdf.set_y(x)
 
-            pdf.output(mypdf)
+        for plotline2 in PlotLines2:
+            
+            x+=60
+            for row in plotline2.data:
+                for item in row:
+                    pdf.cell(col_width, row_height, str(item), border=1, ln=False)
+                pdf.ln(row_height)
+            pdf.set_y(x)
+       
+
+        pdf.output(mypdf)
 
     def channelstatistics(self):
             signalnumbers_1=len(PlotLines1)
