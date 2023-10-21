@@ -170,9 +170,9 @@ class MyWindow(QtWidgets.QMainWindow):
         return (red,green,blue)
 
     def Draw1(self,newplot):
+        newplot.index = 0
         pen = newplot.pen
         newplot.data_line = self.graphWidget1.plot(pen=pen)
-        newplot.index = 0
         self.horizontalScrollBar.setMinimum(0)
         self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
 
@@ -205,9 +205,9 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer2.start()
 
     def Draw2(self,newplot):
+        newplot.index = 0
         pen = newplot.pen
         newplot.data_line = self.graphWidget2.plot(pen=pen)
-        newplot.index = 0
         self.horizontalScrollBar_2.setMinimum(0)
         self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
 
@@ -336,6 +336,7 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.isstopped = True
         elif self.timer1.isActive() == False:
             newplot.isstopped = False
+            self.graphWidget1.removeItem(newplot.data_line)
             self.Draw1(newplot)
         else:
             newplot.isstopped = False
@@ -350,8 +351,9 @@ class MyWindow(QtWidgets.QMainWindow):
         if self.timer2.isActive() and newplot.isstopped == False:
             newplot.isstopped = True
         elif self.timer2.isActive() == False:
-            self.Draw2(newplot)
             newplot.isstopped = False
+            self.graphWidget2.removeItem(newplot.data_line)
+            self.Draw2(newplot)
         else:
             newplot.isstopped = False
             newplot.index = 0
