@@ -434,7 +434,7 @@ class MyWindow(QtWidgets.QMainWindow):
                         if newplot.index >=100:
                             self.graphWidget1.setXRange(
                                 newplot.data["time"][newplot.index-100],
-                                newplot.data["time"][newplot.index],
+                                newplot.data["time"][newplot.index+1],
                                 padding=0,
                             )
                         else:
