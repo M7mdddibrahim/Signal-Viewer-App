@@ -248,6 +248,7 @@ class MyWindow(QtWidgets.QMainWindow):
         if newplot.data["amplitude"].max() > self.Ymax1:
             self.Ymax1 = newplot.data["amplitude"].max()
         self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = self.Xmax1, yMin = self.Ymin1, yMax = self.Ymax1)
+        self.graphWidget1.setYRange(self.Ymin1,self.Ymax1)
 
     def load2(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
@@ -279,7 +280,8 @@ class MyWindow(QtWidgets.QMainWindow):
         if newplot.data["amplitude"].max() > self.Ymax2:
             self.Ymax2 = newplot.data["amplitude"].max()
         self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = self.Xmax2, yMin = self.Ymin2, yMax = self.Ymax2)
-
+        self.graphWidget1.setYRange(self.Ymin1,self.Ymax1)
+        
     def showHideChannel1(self):
         newplot = self.GetChosenPlotLine1()
         if newplot == -1 or len(PlotLines1) == 0:
@@ -385,18 +387,15 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        self.graphWidget1.setXRange(
-                            newplot.data["time"][newplot.index],
-                            newplot.data["time"][newplot.index],
-                            padding=0,
-                        )
+                        if newplot.index+50 <= len(newplot.data) and newplot.index-50 >= 0:
+                            self.graphWidget1.setXRange(
+                                newplot.data["time"][newplot.index-50],
+                                newplot.data["time"][newplot.index+50],
+                                padding=0,
+                            )
+                        else:
+                            self.graphWidget1.setXRange(0,50,padding=0)
                         self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
-
-                        self.graphWidget1.setYRange(
-                            newplot.data["amplitude"][newplot.index],
-                            newplot.data["amplitude"][newplot.index],
-                            padding=0,
-                        )
                         newplot.index += 1
         elif self.ispaused1 == 1:
             self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = newplot.data["time"][newplot.index])
@@ -432,11 +431,14 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        self.graphWidget2.setXRange(
-                            newplot.data["time"][newplot.index],
-                            newplot.data["time"][newplot.index],
-                            padding=0,
-                        )
+                        if newplot.index+50 <= len(newplot.data) and newplot.index-50 >= 0:
+                            self.graphWidget2.setXRange(
+                                newplot.data["time"][newplot.index-50],
+                                newplot.data["time"][newplot.index+50],
+                                padding=0,
+                            )
+                        else:
+                            self.graphWidget2.setXRange(0,50,padding=0)
                         self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
 
                         self.graphWidget2.setYRange(
