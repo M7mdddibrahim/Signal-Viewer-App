@@ -27,48 +27,8 @@ import PIL
 import tempfile
 from fpdf import FPDF
 import random
-
-
-class InputDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(InputDialog, self).__init__(parent)
-        self.setWindowTitle("Input Dialog")
-
-        layout = QtWidgets.QVBoxLayout(self)
-
-        self.input_label = QtWidgets.QLabel("Enter title:")
-        self.input_text = QtWidgets.QLineEdit(self)
-        layout.addWidget(self.input_label)
-        layout.addWidget(self.input_text)
-
-        self.ok_button = QtWidgets.QPushButton("OK", self)
-        layout.addWidget(self.ok_button)
-        self.ok_button.clicked.connect(self.accept)
-
-        self.cancel_button = QtWidgets.QPushButton("Cancel", self)
-        layout.addWidget(self.cancel_button)
-        self.cancel_button.clicked.connect(self.reject)
-
-
-class PLotLine:
-    def __init__(self):
-        self.data = None
-        self.index = 0
-        self.data_line = None
-        self.pen = None
-        self.name = None
-        self.ishidden = False
-        self.ChannelNum = None
-        self.moved = False
-        self.isstopped = False
-        self.maxmiumTime=0
-        self.minimumAmplitude=0
-        self.maxmiumAmplitude=0
-        self.timeMean=0
-        self.amplitudeMean=0
-        self.StatisticalData=[]
-        # self.timer
-
+from PlotLine import *
+import InputDialog
 
 PlotLines1 = []
 PlotLines2 = []
@@ -76,7 +36,6 @@ snapshots1 = []
 snapshots2 = []
 
 ext = (".txt", ".csv")
-
 
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -271,12 +230,12 @@ class MyWindow(QtWidgets.QMainWindow):
                         p = line.split()
                         x.append(float(p[0]))
                         y.append(float(p[1]))
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.DataFrame({"time": x, "amplitude": y})
                 PlotLines1.append(newplot)
                 newplot.ChannelNum = 1
             else:
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.read_csv(path, usecols=["time", "amplitude"])
                 PlotLines1.append(newplot)
                 newplot.ChannelNum = 1
@@ -302,12 +261,12 @@ class MyWindow(QtWidgets.QMainWindow):
                         p = line.split()
                         x.append(float(p[0]))
                         y.append(float(p[1]))
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.DataFrame({"time": x, "amplitude": y})
                 PlotLines2.append(newplot)
                 newplot.ChannelNum = 2
             else:
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.read_csv(path, usecols=["time", "amplitude"])
                 PlotLines2.append(newplot)
                 newplot.ChannelNum = 2
@@ -376,8 +335,8 @@ class MyWindow(QtWidgets.QMainWindow):
         if self.timer1.isActive() and newplot.isstopped == False:
             newplot.isstopped = True
         elif self.timer1.isActive() == False:
-            self.Draw1(newplot)
             newplot.isstopped = False
+            self.Draw1(newplot)
         else:
             newplot.isstopped = False
             newplot.index = 0
@@ -638,7 +597,7 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines1) == 0 or oldplot == -1:
             self.ErrorMsg("No Signal Chosen")
             return
-        newplot = PLotLine()
+        newplot = PlotLine()
         newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
         newplot.pen = oldplot.pen
         PlotLines2.append(newplot)
@@ -682,7 +641,7 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines2) == 0 or oldplot == -1:
             self.ErrorMsg("No Signal Chosen")
             return
-        newplot = PLotLine()
+        newplot = PlotLine()
         newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
         newplot.pen = oldplot.pen
         PlotLines1.append(newplot)
@@ -1102,10 +1061,3 @@ class MyWindow(QtWidgets.QMainWindow):
             # Update the horizontal scroll bar range and value
             self.horizontalScrollBar_2.setRange(0, int(self.Xmax2))
             self.horizontalScrollBar_2.setValue(scroll_value)
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = MyWindow()
-    window.show()
-    sys.exit(app.exec_())
