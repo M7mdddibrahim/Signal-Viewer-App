@@ -884,7 +884,7 @@ class MyWindow(QtWidgets.QMainWindow):
             size=10,
         )
         pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
-        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2))
+        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2)) +".pdf"
         i = 0
         while i < len(snapshots1):
             image_width = 50  # Set the desired image width
