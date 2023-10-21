@@ -1,4 +1,4 @@
-# Signal-Viewer
+# Signal Viewer
 Task 1✅
 Introduction: Monitoring the vital signals is a crucial aim in any ICU room.
 Description: Using Python and Qt, develop a desktop application that illustrates multi-port, multi-channel signal viewer
