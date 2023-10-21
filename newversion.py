@@ -66,7 +66,7 @@ class PLotLine:
         self.maxmiumAmplitude=0
         self.timeMean=0
         self.amplitudeMean=0
-        self.data=[]
+        self.StatisticalData=[]
         # self.timer
 
 
@@ -443,8 +443,8 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines1) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
                 self.graphWidget1.setXRange(
-                    newplot.data["time"][0],
-                    newplot.data["time"][len(newplot.data["time"]) - 1],
+                    newplot.data["time"].min(),
+                    newplot.data["time"].max(),
                 )
                 self.horizontalScrollBar.setMaximum(0)
                 self.graphWidget1.setYRange(
@@ -486,12 +486,13 @@ class MyWindow(QtWidgets.QMainWindow):
 
                         newplot.index += 1
         elif self.ispaused2 == 1:
+            
             self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = newplot.data["time"][newplot.index])
         if len(PlotLines2) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines2):
                 self.graphWidget2.setXRange(
-                    newplot.data["time"][0],
-                    newplot.data["time"][len(newplot.data["time"]) - 1],
+                    newplot.data["time"].min(),
+                    newplot.data["time"].max(),
                 )
                 self.horizontalScrollBar_2.setMaximum(0)
                 self.graphWidget2.setYRange(
@@ -871,7 +872,7 @@ class MyWindow(QtWidgets.QMainWindow):
         # Display a message to the user
         msg = QMessageBox()
         msg.setWindowTitle("Snapshot Saved")
-        msg.setText("Snapshot_channel2" + str(len(self.snapshots2)) + ".png")
+        msg.setText("Snapshot_channel2" + str(len(snapshots2)) + ".png")
         msg.setIcon(QMessageBox.Information)
         msg.exec_()
 
@@ -901,8 +902,8 @@ class MyWindow(QtWidgets.QMainWindow):
                 h=image_height,
             )
             i += 1
-        c = 0
-        while c < len(snapshots2):
+        counter = 0
+        while counter < len(snapshots2):
             image_width = 50  # Set the desired image width
             image_height = 50  # Set the desired image height
             page_width = pdf.w - 2 * pdf.l_margin
@@ -911,23 +912,23 @@ class MyWindow(QtWidgets.QMainWindow):
             x = ((page_width - image_width) / 2)+10
             y = (page_height - image_height) / 2
             pdf.image(
-                "snapshot_channel2" + str(c + 1) + ".png",
-                x=(x * c),
+                "snapshot_channel2" + str(counter + 1) + ".png",
+                x=(x * counter),
                 y=90,
                 w=image_width,
                 h=image_height,
             )
-            c += 1
+            counter += 1
         self.channelstatistics()
-        i=0
+        counter2=0
         for plotline1 in PlotLines1:
-            i+=1
-            plotline1.data=[
+            counter2+=1
+            plotline1.StatisticalData=[
                 [
-                 "Signal "+str(i)+" "+"time mean",
-                 "Signal "+str(i)+" "+"amplitude mean",
-                 "Signal "+str(i)+" "+"maximum time",
-                 "Signal "+str(i)+" "+"maximum amplitude",
+                 "Signal "+str(counter2)+" "+"time mean",
+                 "Signal "+str(counter2)+" "+"amplitude mean",
+                 "Signal "+str(counter2)+" "+"maximum time",
+                 "Signal "+str(counter2)+" "+"maximum amplitude",
 
                 ],
                 [
@@ -937,15 +938,15 @@ class MyWindow(QtWidgets.QMainWindow):
                     plotline1.maxmiumAmplitude,
                 ]
             ]
-            y=0
+            counter3=0
             for plotline2 in PlotLines2:
-             y+=1
-             plotline2.data=[
+             counter3+=1
+             plotline2.StatisticalData=[
                 [
-                 "Signal "+str(y)+" "+"time mean",
-                 "Signal "+str(y)+" "+"amplitude mean",
-                 "Signal "+str(y)+" "+"maximum time",
-                 "Signal "+str(y)+" "+"maximum amplitude",
+                 "Signal "+str(counter3)+" "+"time mean",
+                 "Signal "+str(counter3)+" "+"amplitude mean",
+                 "Signal "+str(counter3)+" "+"maximum time",
+                 "Signal "+str(counter3)+" "+"maximum amplitude",
 
                 ],
                 [
@@ -966,7 +967,7 @@ class MyWindow(QtWidgets.QMainWindow):
         for plotline1 in PlotLines1:
             
             x+=60
-            for row in plotline1.data:
+            for row in plotline1.StatisticalData:
                 for item in row:
                     pdf.cell(col_width, row_height, str(item), border=1, ln=False)
                 pdf.ln(row_height)
@@ -980,7 +981,7 @@ class MyWindow(QtWidgets.QMainWindow):
         for plotline2 in PlotLines2:
             
             x+=60
-            for row in plotline2.data:
+            for row in plotline2.StatisticalData:
                 for item in row:
                     pdf.cell(col_width, row_height, str(item), border=1, ln=False)
                 pdf.ln(row_height)

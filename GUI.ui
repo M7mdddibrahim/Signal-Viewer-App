@@ -50,6 +50,7 @@
             <property name="font">
              <font>
               <pointsize>14</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -113,6 +114,7 @@
             <property name="font">
              <font>
               <pointsize>14</pointsize>
+              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -157,7 +159,7 @@
      <x>0</x>
      <y>0</y>
      <width>799</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -290,6 +292,9 @@
    <property name="text">
     <string>Save As PDF</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="actionZoomIn">
    <property name="icon">
@@ -298,6 +303,9 @@
    </property>
    <property name="text">
     <string>ZoomIn</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+=, Ctrl+1</string>
    </property>
   </action>
   <action name="actionZoomOut">
@@ -312,6 +320,9 @@
     <font>
      <pointsize>10</pointsize>
     </font>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-, Ctrl+1</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -330,10 +341,16 @@
    <property name="text">
     <string>Channel 1</string>
    </property>
+   <property name="shortcut">
+    <string>S, 1</string>
+   </property>
   </action>
   <action name="actionChannel4">
    <property name="text">
     <string>Channel 2</string>
+   </property>
+   <property name="shortcut">
+    <string>S, 2</string>
    </property>
   </action>
   <action name="actionShow_Hide">
@@ -369,6 +386,9 @@
    <property name="toolTip">
     <string>move</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+M, Ctrl+1</string>
+   </property>
   </action>
   <action name="actionZoomIn2">
    <property name="icon">
@@ -378,6 +398,9 @@
    <property name="text">
     <string>ZoomIn2</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+=, Ctrl+2</string>
+   </property>
   </action>
   <action name="actionZoomOut2">
    <property name="icon">
@@ -386,6 +409,9 @@
    </property>
    <property name="text">
     <string>ZoomOut2</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+-, Ctrl+2</string>
    </property>
   </action>
   <action name="actionPlay_Pause2">
@@ -420,6 +446,9 @@
    <property name="text">
     <string>Move2</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+M, Ctrl+2</string>
+   </property>
   </action>
   <action name="actionseprator">
    <property name="icon">
@@ -446,6 +475,9 @@
    </property>
    <property name="text">
     <string>Connect</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
    </property>
   </action>
   <action name="action25x_1">
@@ -502,10 +534,16 @@
    <property name="text">
     <string>Channel 1</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+D, Ctrl+1</string>
+   </property>
   </action>
   <action name="actionChannel_2">
    <property name="text">
     <string>Channel 2</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D, Ctrl+2</string>
    </property>
   </action>
   <action name="Color1">
@@ -532,6 +570,9 @@
    <property name="text">
     <string>Rewind1</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+R, Ctrl+1</string>
+   </property>
   </action>
   <action name="actionrewind2">
    <property name="icon">
@@ -540,6 +581,9 @@
    </property>
    <property name="text">
     <string>Rewind2</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R, Ctrl+2</string>
    </property>
   </action>
  </widget>
