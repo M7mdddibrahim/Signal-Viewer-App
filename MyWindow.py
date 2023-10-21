@@ -387,14 +387,14 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        if newplot.index+50 <= len(newplot.data) and newplot.index-50 >= 0:
+                        if newplot.index >=100:
                             self.graphWidget1.setXRange(
-                                newplot.data["time"][newplot.index-50],
-                                newplot.data["time"][newplot.index+50],
+                                newplot.data["time"][newplot.index-100],
+                                newplot.data["time"][newplot.index+1],
                                 padding=0,
                             )
                         else:
-                            self.graphWidget1.setXRange(0,50,padding=0)
+                            self.graphWidget1.setXRange(0,100,padding=0)
                         self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
                         newplot.index += 1
         elif self.ispaused1 == 1:
@@ -431,14 +431,14 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        if newplot.index+50 <= len(newplot.data) and newplot.index-50 >= 0:
-                            self.graphWidget2.setXRange(
-                                newplot.data["time"][newplot.index-50],
-                                newplot.data["time"][newplot.index+50],
+                        if newplot.index >=100:
+                            self.graphWidget1.setXRange(
+                                newplot.data["time"][newplot.index-100],
+                                newplot.data["time"][newplot.index],
                                 padding=0,
                             )
                         else:
-                            self.graphWidget2.setXRange(0,50,padding=0)
+                            self.graphWidget1.setXRange(0,100,padding=0)
                         self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
 
                         self.graphWidget2.setYRange(
