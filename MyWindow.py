@@ -387,7 +387,7 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        if newplot.index >=100:
+                        if newplot.index >=100 and newplot.index+1 <= newplot.data["time"].max():
                             self.graphWidget1.setXRange(
                                 newplot.data["time"][newplot.index-100],
                                 newplot.data["time"][newplot.index+1],
@@ -431,7 +431,7 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        if newplot.index >=100:
+                        if newplot.index >=100 and newplot.index+1 <= newplot.data["time"].max():
                             self.graphWidget2.setXRange(
                                 newplot.data["time"][newplot.index-100],
                                 newplot.data["time"][newplot.index+1],
@@ -488,6 +488,7 @@ class MyWindow(QtWidgets.QMainWindow):
         viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots2()
+
     def zoomInChannel2(self):
         viewbox = self.graphWidget2.getViewBox()
         x_min, x_max = self.graphWidget2.viewRange()[0]
