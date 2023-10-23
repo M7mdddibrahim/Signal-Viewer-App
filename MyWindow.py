@@ -142,7 +142,11 @@ class MyWindow(QtWidgets.QMainWindow):
 
 
     def DrawChannel1(self):
-        self.load1()
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        path = filename[0]
+        self.load1(path=path)
+        if path == '':
+            return
         random_rgb = self.random_color()
         newplot = PlotLines1[-1]
         newplot.pen = pg.mkPen(color = random_rgb)
@@ -184,7 +188,11 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer1.start()
 
     def DrawChannel2(self):
-        self.load2()
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        path = filename[0]
+        self.load2(path=path)
+        if path == '':
+            return
         random_rgb = self.random_color()
         newplot = PlotLines2[-1]
         newplot.pen = pg.mkPen(color = random_rgb)
@@ -218,9 +226,7 @@ class MyWindow(QtWidgets.QMainWindow):
         )  # Connect to a single update method
         self.timer2.start()
 
-    def load1(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        path = filename[0]
+    def load1(self,path):
         if path.endswith(ext):
             if path.endswith(".txt"):
                 with open(path, "r") as data:
@@ -241,6 +247,8 @@ class MyWindow(QtWidgets.QMainWindow):
                 newplot.ChannelNum = 1
         else:
             self.ErrorMsg("You can only load .txt or .csv files.")
+        if path == '':
+            return
         if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax1:
             self.Xmax1 = newplot.data["time"][len(newplot.data["time"]) - 1]
         if newplot.data["amplitude"].min() < self.Ymin1:
@@ -250,9 +258,7 @@ class MyWindow(QtWidgets.QMainWindow):
         self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = self.Xmax1, yMin = self.Ymin1, yMax = self.Ymax1)
         self.graphWidget1.setYRange(self.Ymin1,self.Ymax1)
 
-    def load2(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        path = filename[0]
+    def load2(self,path):
         if path.endswith(ext):
             if path.endswith(".txt"):
                 with open(path, "r") as data:
@@ -273,6 +279,8 @@ class MyWindow(QtWidgets.QMainWindow):
                 newplot.ChannelNum = 2
         else:
             self.ErrorMsg("You can only load .txt or .csv files.")
+        if path == '':
+            return
         if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax2:
             self.Xmax2 = newplot.data["time"][len(newplot.data["time"]) - 1]
         if newplot.data["amplitude"].min() < self.Ymin2:
@@ -294,16 +302,16 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.data_line.show()
             newplot.ishidden = False
         if self.connect_status:
-          newplot2 = self.GetChosenPlotLine2()
-          if newplot2 == -1 or len(PlotLines2) == 0:
-            self.ErrorMsg("No Signal Chosen")
-            return
-          if newplot2.ishidden == False:
-            newplot2.data_line.hide()
-            newplot2.ishidden = True
-          else:
-            newplot2.data_line.show()
-            newplot2.ishidden = False
+            newplot2 = self.GetChosenPlotLine2()
+            if newplot2 == -1 or len(PlotLines2) == 0:
+                self.ErrorMsg("No Signal Chosen")
+                return
+            if newplot2.ishidden == False:
+                newplot2.data_line.hide()
+                newplot2.ishidden = True
+            else:
+                newplot2.data_line.show()
+                newplot2.ishidden = False
 
 
     def showHideChannel2(self):
@@ -318,16 +326,16 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.data_line.show()
             newplot.ishidden = False
         if self.connect_status:
-         newplot2 = self.GetChosenPlotLine1()
-         if newplot2 == -1 or len(PlotLines1) == 0:
-            self.ErrorMsg("No Signal Chosen")
-            return
-         if newplot2.ishidden == False:
-            newplot2.data_line.hide()
-            newplot2.ishidden = True
-         else:
-            newplot2.data_line.show()
-            newplot2.ishidden = False
+            newplot2 = self.GetChosenPlotLine1()
+            if newplot2 == -1 or len(PlotLines1) == 0:
+                self.ErrorMsg("No Signal Chosen")
+                return
+            if newplot2.ishidden == False:
+                newplot2.data_line.hide()
+                newplot2.ishidden = True
+            else:
+                newplot2.data_line.show()
+                newplot2.ishidden = False
 
     def rewind1(self):
         newplot = self.GetChosenPlotLine1()
@@ -344,7 +352,6 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.isstopped = False
             newplot.index = 0
 
-
     def rewind2(self):
         newplot = self.GetChosenPlotLine2()
         if newplot == -1 or len(PlotLines2) == 0:
@@ -359,7 +366,6 @@ class MyWindow(QtWidgets.QMainWindow):
         else:
             newplot.isstopped = False
             newplot.index = 0
-
 
     def ErrorMsg(self, text):
         msg = QMessageBox()
