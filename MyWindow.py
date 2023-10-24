@@ -27,48 +27,8 @@ import PIL
 import tempfile
 from fpdf import FPDF
 import random
-
-
-class InputDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None):
-        super(InputDialog, self).__init__(parent)
-        self.setWindowTitle("Input Dialog")
-
-        layout = QtWidgets.QVBoxLayout(self)
-
-        self.input_label = QtWidgets.QLabel("Enter title:")
-        self.input_text = QtWidgets.QLineEdit(self)
-        layout.addWidget(self.input_label)
-        layout.addWidget(self.input_text)
-
-        self.ok_button = QtWidgets.QPushButton("OK", self)
-        layout.addWidget(self.ok_button)
-        self.ok_button.clicked.connect(self.accept)
-
-        self.cancel_button = QtWidgets.QPushButton("Cancel", self)
-        layout.addWidget(self.cancel_button)
-        self.cancel_button.clicked.connect(self.reject)
-
-
-class PLotLine:
-    def __init__(self):
-        self.data = None
-        self.index = 0
-        self.data_line = None
-        self.pen = None
-        self.name = None
-        self.ishidden = False
-        self.ChannelNum = None
-        self.moved = False
-        self.isstopped = False
-        self.maxmiumTime=0
-        self.minimumAmplitude=0
-        self.maxmiumAmplitude=0
-        self.timeMean=0
-        self.amplitudeMean=0
-        self.data=[]
-        # self.timer
-
+from PlotLine import *
+import InputDialog
 
 PlotLines1 = []
 PlotLines2 = []
@@ -76,7 +36,6 @@ snapshots1 = []
 snapshots2 = []
 
 ext = (".txt", ".csv")
-
 
 class MyWindow(QtWidgets.QMainWindow):
     def __init__(self):
@@ -138,8 +97,10 @@ class MyWindow(QtWidgets.QMainWindow):
         self.graphWidget2 = pg.PlotWidget()
         self.graphWidget1.setMaximumSize(1000, 1000)
         self.graphWidget1.setMinimumSize(400, 400)
+        self.graphWidget1.setXRange(0,100,padding=0)
         self.graphWidget2.setMinimumSize(400, 400)
         self.graphWidget2.setMaximumSize(1000, 1000)
+        self.graphWidget2.setXRange(0,100,padding=0)
         self.ui.gridLayout_2.addWidget(self.graphWidget1)
         self.ui.gridLayout_3.addWidget(self.graphWidget2)
         self.graphWidget1.setMouseEnabled(x=False,y=False)
@@ -147,8 +108,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.data_line = None
         self.ishidden1 = 0
         self.ishidden2 = 0
-        self.zoomFactorChannel1 = 100
-        self.zoomFactorChannel2 = 100
+        self.zoomFactorChannel1 = 1
+        self.zoomFactorChannel2 = 1
         self.ispaused1 = 0
         self.ispaused2 = 0
         self.signal1speed = 1
@@ -183,7 +144,11 @@ class MyWindow(QtWidgets.QMainWindow):
 
 
     def DrawChannel1(self):
-        self.load1()
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        path = filename[0]
+        self.load1(path=path)
+        if path == '':
+            return
         random_rgb = self.random_color()
         newplot = PlotLines1[-1]
         newplot.pen = pg.mkPen(color = random_rgb)
@@ -194,7 +159,6 @@ class MyWindow(QtWidgets.QMainWindow):
         list.append(newplot.name)
         self.comboBox.addItems(list)
         self.horizontalScrollBar.setMinimum(0)
-        self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
 
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
@@ -211,11 +175,10 @@ class MyWindow(QtWidgets.QMainWindow):
         return (red,green,blue)
 
     def Draw1(self,newplot):
+        newplot.index = 0
         pen = newplot.pen
         newplot.data_line = self.graphWidget1.plot(pen=pen)
-        newplot.index = 0
         self.horizontalScrollBar.setMinimum(0)
-        self.horizontalScrollBar.setMaximum(int(self.Xmax1*10))
 
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
@@ -225,7 +188,11 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer1.start()
 
     def DrawChannel2(self):
-        self.load2()
+        filename = QtWidgets.QFileDialog.getOpenFileName()
+        path = filename[0]
+        self.load2(path=path)
+        if path == '':
+            return
         random_rgb = self.random_color()
         newplot = PlotLines2[-1]
         newplot.pen = pg.mkPen(color = random_rgb)
@@ -236,7 +203,6 @@ class MyWindow(QtWidgets.QMainWindow):
         list.append(newplot.name)
         self.comboBox_2.addItems(list)
         self.horizontalScrollBar_2.setMinimum(0)
-        self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
 
         self.timer2 = QtCore.QTimer()
         self.timer2.setInterval(int(50 / self.signal2speed))
@@ -246,11 +212,10 @@ class MyWindow(QtWidgets.QMainWindow):
         self.timer2.start()
 
     def Draw2(self,newplot):
+        newplot.index = 0
         pen = newplot.pen
         newplot.data_line = self.graphWidget2.plot(pen=pen)
-        newplot.index = 0
         self.horizontalScrollBar_2.setMinimum(0)
-        self.horizontalScrollBar_2.setMaximum(int(self.Xmax2*10))
 
         self.timer2 = QtCore.QTimer()
         self.timer2.setInterval(int(50 / self.signal2speed))
@@ -259,9 +224,7 @@ class MyWindow(QtWidgets.QMainWindow):
         )  # Connect to a single update method
         self.timer2.start()
 
-    def load1(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        path = filename[0]
+    def load1(self,path):
         if path.endswith(ext):
             if path.endswith(".txt"):
                 with open(path, "r") as data:
@@ -271,17 +234,19 @@ class MyWindow(QtWidgets.QMainWindow):
                         p = line.split()
                         x.append(float(p[0]))
                         y.append(float(p[1]))
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.DataFrame({"time": x, "amplitude": y})
                 PlotLines1.append(newplot)
                 newplot.ChannelNum = 1
             else:
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.read_csv(path, usecols=["time", "amplitude"])
                 PlotLines1.append(newplot)
                 newplot.ChannelNum = 1
         else:
             self.ErrorMsg("You can only load .txt or .csv files.")
+        if path == '':
+            return
         if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax1:
             self.Xmax1 = newplot.data["time"][len(newplot.data["time"]) - 1]
         if newplot.data["amplitude"].min() < self.Ymin1:
@@ -289,10 +254,10 @@ class MyWindow(QtWidgets.QMainWindow):
         if newplot.data["amplitude"].max() > self.Ymax1:
             self.Ymax1 = newplot.data["amplitude"].max()
         self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = self.Xmax1, yMin = self.Ymin1, yMax = self.Ymax1)
+        self.horizontalScrollBar.setMaximum(int(self.Xmax1))
+        self.graphWidget1.setYRange(self.Ymin1,self.Ymax1)
 
-    def load2(self):
-        filename = QtWidgets.QFileDialog.getOpenFileName()
-        path = filename[0]
+    def load2(self,path):
         if path.endswith(ext):
             if path.endswith(".txt"):
                 with open(path, "r") as data:
@@ -302,17 +267,19 @@ class MyWindow(QtWidgets.QMainWindow):
                         p = line.split()
                         x.append(float(p[0]))
                         y.append(float(p[1]))
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.DataFrame({"time": x, "amplitude": y})
                 PlotLines2.append(newplot)
                 newplot.ChannelNum = 2
             else:
-                newplot = PLotLine()
+                newplot = PlotLine()
                 newplot.data = pd.read_csv(path, usecols=["time", "amplitude"])
                 PlotLines2.append(newplot)
                 newplot.ChannelNum = 2
         else:
             self.ErrorMsg("You can only load .txt or .csv files.")
+        if path == '':
+            return
         if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax2:
             self.Xmax2 = newplot.data["time"][len(newplot.data["time"]) - 1]
         if newplot.data["amplitude"].min() < self.Ymin2:
@@ -320,7 +287,9 @@ class MyWindow(QtWidgets.QMainWindow):
         if newplot.data["amplitude"].max() > self.Ymax2:
             self.Ymax2 = newplot.data["amplitude"].max()
         self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = self.Xmax2, yMin = self.Ymin2, yMax = self.Ymax2)
-
+        self.horizontalScrollBar_2.setMaximum(self.Xmax2)
+        self.graphWidget2.setYRange(self.Ymin2,self.Ymax2)
+        
     def showHideChannel1(self):
         newplot = self.GetChosenPlotLine1()
         if newplot == -1 or len(PlotLines1) == 0:
@@ -333,16 +302,16 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.data_line.show()
             newplot.ishidden = False
         if self.connect_status:
-          newplot2 = self.GetChosenPlotLine2()
-          if newplot2 == -1 or len(PlotLines2) == 0:
-            self.ErrorMsg("No Signal Chosen")
-            return
-          if newplot2.ishidden == False:
-            newplot2.data_line.hide()
-            newplot2.ishidden = True
-          else:
-            newplot2.data_line.show()
-            newplot2.ishidden = False
+            newplot2 = self.GetChosenPlotLine2()
+            if newplot2 == -1 or len(PlotLines2) == 0:
+                self.ErrorMsg("No Signal Chosen")
+                return
+            if newplot2.ishidden == False:
+                newplot2.data_line.hide()
+                newplot2.ishidden = True
+            else:
+                newplot2.data_line.show()
+                newplot2.ishidden = False
 
 
     def showHideChannel2(self):
@@ -357,16 +326,16 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.data_line.show()
             newplot.ishidden = False
         if self.connect_status:
-         newplot2 = self.GetChosenPlotLine1()
-         if newplot2 == -1 or len(PlotLines1) == 0:
-            self.ErrorMsg("No Signal Chosen")
-            return
-         if newplot2.ishidden == False:
-            newplot2.data_line.hide()
-            newplot2.ishidden = True
-         else:
-            newplot2.data_line.show()
-            newplot2.ishidden = False
+            newplot2 = self.GetChosenPlotLine1()
+            if newplot2 == -1 or len(PlotLines1) == 0:
+                self.ErrorMsg("No Signal Chosen")
+                return
+            if newplot2.ishidden == False:
+                newplot2.data_line.hide()
+                newplot2.ishidden = True
+            else:
+                newplot2.data_line.show()
+                newplot2.ishidden = False
 
     def rewind1(self):
         newplot = self.GetChosenPlotLine1()
@@ -376,12 +345,12 @@ class MyWindow(QtWidgets.QMainWindow):
         if self.timer1.isActive() and newplot.isstopped == False:
             newplot.isstopped = True
         elif self.timer1.isActive() == False:
-            self.Draw1(newplot)
             newplot.isstopped = False
+            self.graphWidget1.removeItem(newplot.data_line)
+            self.Draw1(newplot)
         else:
             newplot.isstopped = False
             newplot.index = 0
-
 
     def rewind2(self):
         newplot = self.GetChosenPlotLine2()
@@ -391,12 +360,12 @@ class MyWindow(QtWidgets.QMainWindow):
         if self.timer2.isActive() and newplot.isstopped == False:
             newplot.isstopped = True
         elif self.timer2.isActive() == False:
-            self.Draw2(newplot)
             newplot.isstopped = False
+            self.graphWidget2.removeItem(newplot.data_line)
+            self.Draw2(newplot)
         else:
             newplot.isstopped = False
             newplot.index = 0
-
 
     def ErrorMsg(self, text):
         msg = QMessageBox()
@@ -406,6 +375,7 @@ class MyWindow(QtWidgets.QMainWindow):
         x = msg.exec_()
 
     def update_plots1(self):
+        self.horizontalScrollBar.setMaximum(int(self.Xmax1))
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
         self.timer1.timeout.connect(
@@ -420,31 +390,27 @@ class MyWindow(QtWidgets.QMainWindow):
                 if newplot.isstopped == False:
                     if newplot.index < len(newplot.data):
                         x_data = newplot.data["time"][: newplot.index + 1]
-                        y_data = (
-                            newplot.data["amplitude"][: newplot.index + 1]
-                        )
+                        y_data = newplot.data["amplitude"][: newplot.index + 1]
                         newplot.data_line.setData(x_data, y_data)
-                        self.graphWidget1.setXRange(
-                            newplot.data["time"][newplot.index],
-                            newplot.data["time"][newplot.index],
-                            padding=0,
-                        )
-                        self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
-
-                        self.graphWidget1.setYRange(
-                            newplot.data["amplitude"][newplot.index],
-                            newplot.data["amplitude"][newplot.index],
-                            padding=0,
-                        )
+                        x_range = self.graphWidget1.getViewBox().viewRange()[0][1] - self.graphWidget1.getViewBox().viewRange()[0][0]
+                        if newplot.index+1 >=x_range and newplot.index+1 <= newplot.data["time"].max():
+                            self.graphWidget1.setXRange(
+                                newplot.data["time"][int((newplot.index-x_range+1)*self.zoomFactorChannel1)],
+                                newplot.data["time"][newplot.index+1],
+                                padding=0
+                            )
+                        else:
+                            self.graphWidget1.setXRange(0,100,padding=0)
+                        self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0]))
                         newplot.index += 1
         elif self.ispaused1 == 1:
-            self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = newplot.data["time"][newplot.index])
+            self.graphWidget1.setLimits(xMin = 0, xMax = newplot.data["time"][newplot.index])
             # Check if all data is plotted; if so, stop the timer
         if len(PlotLines1) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
                 self.graphWidget1.setXRange(
-                    newplot.data["time"][0],
-                    newplot.data["time"][len(newplot.data["time"]) - 1],
+                    newplot.data["time"].min(),
+                    newplot.data["time"].max(),
                 )
                 self.horizontalScrollBar.setMaximum(0)
                 self.graphWidget1.setYRange(
@@ -454,6 +420,7 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.timer1.stop()
 
     def update_plots2(self):
+        self.horizontalScrollBar_2.setMaximum(int(self.Xmax2))
         self.timer2 = QtCore.QTimer()
         self.timer2.setInterval(int(50 / self.signal2speed))
         self.timer2.timeout.connect(
@@ -471,27 +438,25 @@ class MyWindow(QtWidgets.QMainWindow):
                             newplot.data["amplitude"][: newplot.index + 1]
                         )
                         newplot.data_line.setData(x_data, y_data)
-                        self.graphWidget2.setXRange(
-                            newplot.data["time"][newplot.index],
-                            newplot.data["time"][newplot.index],
-                            padding=0,
-                        )
+                        if newplot.index >=100 and newplot.index+1 <= newplot.data["time"].max():
+                            self.graphWidget2.setXRange(
+                                newplot.data["time"][newplot.index-100],
+                                newplot.data["time"][newplot.index+1],
+                                padding=0
+                            )
+                        else:
+                            self.graphWidget2.setXRange(0,100,padding=0)
                         self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
-
-                        self.graphWidget2.setYRange(
-                            newplot.data["amplitude"][newplot.index],
-                            newplot.data["amplitude"][newplot.index],
-                            padding=0,
-                        )
 
                         newplot.index += 1
         elif self.ispaused2 == 1:
+            
             self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = newplot.data["time"][newplot.index])
         if len(PlotLines2) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines2):
                 self.graphWidget2.setXRange(
-                    newplot.data["time"][0],
-                    newplot.data["time"][len(newplot.data["time"]) - 1],
+                    newplot.data["time"].min(),
+                    newplot.data["time"].max(),
                 )
                 self.horizontalScrollBar_2.setMaximum(0)
                 self.graphWidget2.setYRange(
@@ -502,28 +467,27 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def zoomInChannel1(self):
         viewbox = self.graphWidget1.getViewBox()
-        x_min, x_max = self.graphWidget1.viewRange()[0]
-        # Decrease the scale (range) of the X and Y axes to zoom in
-        new_x_range = viewbox.viewRange()[0]
+        # # Decrease the scale (range) of the X and Y axes to zoom in
+        # new_x_range = viewbox.viewRange()[0]
         new_y_range = viewbox.viewRange()[1]
-        new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
+        # new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
         new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
         self.zoomFactorChannel1 /= 0.8
-        viewbox.setXRange(*new_x_range)
+        # viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots1()
         if self.connect_status:
             viewbox = self.graphWidget2.getViewBox()
-        x_min, x_max = self.graphWidget2.viewRange()[0]
-        # Decrease the scale (range) of the X and Y axes to zoom in
-        new_x_range = viewbox.viewRange()[0]
-        new_y_range = viewbox.viewRange()[1]
-        new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
-        new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
-        self.zoomFactorChannel2 /= 0.8
-        viewbox.setXRange(*new_x_range)
-        viewbox.setYRange(*new_y_range)
-        self.update_plots2()
+            # Decrease the scale (range) of the X and Y axes to zoom in
+            new_x_range = viewbox.viewRange()[0]
+            new_y_range = viewbox.viewRange()[1]
+            new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
+            new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
+            self.zoomFactorChannel2 /= 0.8
+            viewbox.setXRange(*new_x_range)
+            viewbox.setYRange(*new_y_range)
+            self.update_plots2()
+
     def zoomInChannel2(self):
         viewbox = self.graphWidget2.getViewBox()
         x_min, x_max = self.graphWidget2.viewRange()[0]
@@ -547,7 +511,7 @@ class MyWindow(QtWidgets.QMainWindow):
             self.zoomFactorChannel1 /= 0.8
             viewbox.setXRange(*new_x_range)
             viewbox.setYRange(*new_y_range)
-            self.update_plots1()
+            self.update_plots2()
 
     def zoomOutChannel1(self):
         viewbox = self.graphWidget1.getViewBox()
@@ -555,12 +519,12 @@ class MyWindow(QtWidgets.QMainWindow):
         if x_min == 0 and x_max == self.Xmax1:
             return
         # Decrease the scale (range) of the X and Y axes to zoom in
-        new_x_range = viewbox.viewRange()[0]
+        # new_x_range = viewbox.viewRange()[0]
         new_y_range = viewbox.viewRange()[1]
-        new_x_range = (new_x_range[0] * 1.2, new_x_range[1] * 1.2)
-        new_y_range = (new_y_range[0] * 1.2, new_y_range[1] * 1.2)
-        self.zoomFactorChannel1 /= 1.2
-        viewbox.setXRange(*new_x_range)
+        # new_x_range = (new_x_range[0] / 0.8, new_x_range[1] / 0.8)
+        new_y_range = (new_y_range[0] / 0.8, new_y_range[1] / 0.8)
+        self.zoomFactorChannel1 *= 0.8
+        # viewbox.setXRange(*new_x_range)
         viewbox.setYRange(*new_y_range)
         self.update_plots1()
         if self.connect_status:
@@ -637,23 +601,20 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines1) == 0 or oldplot == -1:
             self.ErrorMsg("No Signal Chosen")
             return
-        newplot = PLotLine()
+        newplot = PlotLine()
         newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
         newplot.pen = oldplot.pen
         PlotLines2.append(newplot)
         newplot.name = "Signal " + str(len(PlotLines2))
         newplot.data_line = self.graphWidget2.plot(pen=newplot.pen,name=newplot.name)
-        newplot.index = 0
+        newplot.index = oldplot.index
         newplot.ChannelNum = 2
         # Clear the old data in the first graph if needed
         oldplot.index=0
         index = self.GetChosenIndex1()
         if index != -1:
             PlotLines1.pop(index)
-        x_data = oldplot.data["time"][: oldplot.index + 1]
-        y_data = oldplot.data["amplitude"][: oldplot.index + 1]
-        oldplot.data_line.setData(x_data, y_data)
-        self.legend1.removeItem(oldplot.data_line)
+        self.graphWidget1.removeItem(oldplot.data_line)
         list = []
         list.append(newplot.name)
         self.comboBox_2.addItems(list)
@@ -662,7 +623,16 @@ class MyWindow(QtWidgets.QMainWindow):
         list= []
         list.append("Choose Channel")
         self.comboBox.addItems(list)
-        i=0
+        if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax2:
+            self.Xmax2 = newplot.data["time"][len(newplot.data["time"]) - 1]
+        if newplot.data["amplitude"].min() < self.Ymin2:
+            self.Ymin2 = newplot.data["amplitude"].min()
+        if newplot.data["amplitude"].max() > self.Ymax2:
+            self.Ymax2 = newplot.data["amplitude"].max()
+        self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = self.Xmax2, yMin = self.Ymin2, yMax = self.Ymax2)
+        self.horizontalScrollBar_2.setMaximum(int(self.Xmax2))
+        self.graphWidget2.setYRange(self.Ymin2,self.Ymax2)
+        i = 0
         for newplot in PlotLines1:
             if newplot:
                 newplot.name = "Signal " + str(i+1)
@@ -681,23 +651,20 @@ class MyWindow(QtWidgets.QMainWindow):
         if len(PlotLines2) == 0 or oldplot == -1:
             self.ErrorMsg("No Signal Chosen")
             return
-        newplot = PLotLine()
+        newplot = PlotLine()
         newplot.data = oldplot.data  # Copy the data from the first plot to the new plot
         newplot.pen = oldplot.pen
         PlotLines1.append(newplot)
         newplot.name = "Signal " + str(len(PlotLines1))
         newplot.data_line = self.graphWidget1.plot(pen=newplot.pen,name=newplot.name)
-        newplot.index = 0
+        newplot.index = oldplot.index
         newplot.ChannelNum = 1
         # Clear the old data in the first graph if needed
         oldplot.index=0
         index = self.GetChosenIndex2()
         if index != -1:
             PlotLines2.pop(index)
-        x_data = oldplot.data["time"][: oldplot.index + 1]
-        y_data = oldplot.data["amplitude"][: oldplot.index + 1]
-        oldplot.data_line.setData(x_data, y_data)
-        self.legend2.removeItem(oldplot.data_line)
+        self.graphWidget2.removeItem(oldplot.data_line)
         list = []
         list.append(newplot.name)
         self.comboBox.addItems(list)
@@ -706,7 +673,16 @@ class MyWindow(QtWidgets.QMainWindow):
         list= []
         list.append("Choose Channel")
         self.comboBox_2.addItems(list)
-        i=0
+        if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax1:
+            self.Xmax2 = newplot.data["time"][len(newplot.data["time"]) - 1]
+        if newplot.data["amplitude"].min() < self.Ymin1:
+            self.Ymin1 = newplot.data["amplitude"].min()
+        if newplot.data["amplitude"].max() > self.Ymax1:
+            self.Ymax1 = newplot.data["amplitude"].max()
+        self.graphWidget1.setLimits(xMin = self.Xmin1, xMax = self.Xmax1, yMin = self.Ymin1, yMax = self.Ymax1)
+        self.horizontalScrollBar.setMaximum(int(self.Xmax1))
+        self.graphWidget1.setYRange(self.Ymin2,self.Ymax2)
+        i = 0
         for newplot in PlotLines2:
             if newplot:
                 newplot.name = "Signal " + str(i+1)
@@ -871,136 +847,123 @@ class MyWindow(QtWidgets.QMainWindow):
         # Display a message to the user
         msg = QMessageBox()
         msg.setWindowTitle("Snapshot Saved")
-        msg.setText("Snapshot_channel2" + str(len(self.snapshots2)) + ".png")
+        msg.setText("Snapshot_channel2" + str(len(snapshots2)) + ".png")
         msg.setIcon(QMessageBox.Information)
         msg.exec_()
 
     def create_pdf_with_qimages(self):
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font(
-                "Arial",
-                size=10,
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font(
+            "Arial",
+            size=10,
+        )
+        pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
+        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2)) +".pdf"
+        i = 0
+        while i < len(snapshots1):
+            image_width = 50  # Set the desired image width
+            image_height = 50  # Set the desired image height
+            page_width = pdf.w - 2 * pdf.l_margin
+            page_height = pdf.h - 2 * pdf.t_margin
+
+            x = ((page_width - image_width) / 2)+10
+            y = (page_height - image_height) / 2
+            pdf.image(
+                "snapshot_channel1" + str(i + 1) + ".png",
+                x=(x * i),
+                y=30,
+                w=image_width,
+                h=image_height,
             )
-            pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
-            mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2))
-            i = 0
-            while i < len(snapshots1):
-                image_width = 50  # Set the desired image width
-                image_height = 50  # Set the desired image height
-                page_width = pdf.w - 2 * pdf.l_margin
-                page_height = pdf.h - 2 * pdf.t_margin
+            i += 1
+        counter = 0
+        while counter < len(snapshots2):
+            image_width = 50  # Set the desired image width
+            image_height = 50  # Set the desired image height
+            page_width = pdf.w - 2 * pdf.l_margin
+            page_height = pdf.h - 2 * pdf.t_margin
 
-                x = ((page_width - image_width) / 2)+10
-                y = (page_height - image_height) / 2
-                pdf.image(
-                    "snapshot_channel1" + str(i + 1) + ".png",
-                    x=(x * i),
-                    y=30,
-                    w=image_width,
-                    h=image_height,
-                )
-                i += 1
-            c = 0
-            while c < len(snapshots2):
-                image_width = 50  # Set the desired image width
-                image_height = 50  # Set the desired image height
-                page_width = pdf.w - 2 * pdf.l_margin
-                page_height = pdf.h - 2 * pdf.t_margin
+            x = ((page_width - image_width) / 2)+10
+            y = (page_height - image_height) / 2
+            pdf.image(
+                "snapshot_channel2" + str(counter + 1) + ".png",
+                x=(x * counter),
+                y=90,
+                w=image_width,
+                h=image_height,
+            )
+            counter += 1
+        self.channelstatistics()
+        counter2=0
+        for plotline1 in PlotLines1:
+            counter2+=1
+            plotline1.StatisticalData=[
+                [
+                 "Signal "+str(counter2)+" "+"time mean",
+                 "Signal "+str(counter2)+" "+"amplitude mean",
+                 "Signal "+str(counter2)+" "+"maximum time",
+                 "Signal "+str(counter2)+" "+"maximum amplitude",
 
-                x = ((page_width - image_width) / 2)+10
-                y = (page_height - image_height) / 2
-                pdf.image(
-                    "snapshot_channel2" + str(c + 1) + ".png",
-                    x=(x * c),
-                    y=90,
-                    w=image_width,
-                    h=image_height,
-                )
-                c += 1
-            self.channelstatistics()
-            data = [
+                ],
                 [
-                    "Channel 1 time mean",
-                    "Channel 2 time mean",
-                    "Channel 1 amplitude mean",
-                    "Channel 2 amplitude mean",
-                ],  # 'testing','size'],
-                [
-                    self.time_mean1,
-                    self.time_mean2,
-                    self.amplitude_mean1,
-                    self.amplitude_mean2,
-                ],  # 'testing','size'],
-            ]
-            Data = [
-                [
-                    "Channel 1 max time",
-                    "Channel 2 max time",
-                    "Channel 1 min time",
-                    "Channel 2 min time",
-                ],  # 'testing','size'],
-                [
-                    self.max1,
-                    self.max2,
-                    self.min1,
-                    self.min2,
-                ],  # 'testing','size'],
-            ]
-            i=0
-            for plotline1 in PlotLines1:
-                i+=1
-                plotline1.data=[
-                    [
-                    "Signal "+str(i)+" "+"time mean",
-                    "Signal "+str(i)+" "+"amplitude mean",
-                    "Signal "+str(i)+" "+"maximum time",
-                    "Signal "+str(i)+" "+"maximum amplitude",
-
-                    ],
-                    [
-                        plotline1.timeMean,
-                        plotline1.amplitudeMean,
-                        plotline1.maxmiumTime,
-                        plotline1.maxmiumAmplitude,
-                    ]
+                    plotline1.timeMean,
+                    plotline1.amplitudeMean,
+                    plotline1.maxmiumTime,
+                    plotline1.maxmiumAmplitude,
                 ]
-                x=0
-                for plotline2 in PlotLines2:
-                    x+=1
-                    plotline2.data=[
-                        [
-                        "Signal "+str(i)+" "+"time mean",
-                        "Signal "+str(i)+" "+"amplitude mean",
-                        "Signal "+str(i)+" "+"maximum time",
-                        "Signal "+str(i)+" "+"maximum amplitude",
+            ]
+            counter3=0
+            for plotline2 in PlotLines2:
+             counter3+=1
+             plotline2.StatisticalData=[
+                [
+                 "Signal "+str(counter3)+" "+"time mean",
+                 "Signal "+str(counter3)+" "+"amplitude mean",
+                 "Signal "+str(counter3)+" "+"maximum time",
+                 "Signal "+str(counter3)+" "+"maximum amplitude",
 
-                        ],
-                        [
-                            plotline2.timeMean,
-                            plotline2.amplitudeMean,
-                            plotline2.maxmiumTime,
-                            plotline2.maxmiumAmplitude,
-                        ]
-                    ]
-                
-            col_width = pdf.w / 4.5
-            row_height = 20
+                ],
+                [
+                    plotline2.timeMean,
+                    plotline2.amplitudeMean,
+                    plotline2.maxmiumTime,
+                    plotline2.maxmiumAmplitude,
+                ]
+            ]
+        pdf.set_y(150)
+        pdf.cell(200, 5, align="C", txt="Plot widget 1 Signals Statistics", ln=True)
+        col_width = pdf.w / 4.5
+        row_height = 20
 
-            pdf.set_y(170)
-            x=170
-            # Add a table at the bottom
-            for plotline1 in PlotLines1:
-                
-                x+=60
-                for row in plotline1.data:
-                    for item in row:
-                        pdf.cell(col_width, row_height, str(item), border=1, ln=False)
-                    pdf.ln(row_height)
-                pdf.set_y(x)
-        
+        pdf.set_y(170)
+        x=170
+        # Add a table at the bottom
+        for plotline1 in PlotLines1:
+            
+            x+=60
+            for row in plotline1.StatisticalData:
+                for item in row:
+                    pdf.cell(col_width, row_height, str(item), border=1, ln=False)
+                pdf.ln(row_height)
+            pdf.set_y(x)
+        x-=280
+        pdf.set_y(x)
+        pdf.cell(200, 5, align="C", txt="Plot widget 2 Signals Statistics", ln=True)
+        x+=20
+        pdf.set_y(x)
 
-            pdf.output(mypdf)
+        for plotline2 in PlotLines2:
+            
+            x+=60
+            for row in plotline2.StatisticalData:
+                for item in row:
+                    pdf.cell(col_width, row_height, str(item), border=1, ln=False)
+                pdf.ln(row_height)
+            pdf.set_y(x)
+       
+
+        pdf.output(mypdf)
 
     def channelstatistics(self):
             signalnumbers_1=len(PlotLines1)
@@ -1094,10 +1057,6 @@ class MyWindow(QtWidgets.QMainWindow):
             # Update the view range of the plot widget to scroll the graph window
             self.graphWidget1.setXRange(new_x_min, new_x_max, padding=0)
 
-            # Update the horizontal scroll bar range and value
-            self.horizontalScrollBar.setRange(0, int(self.Xmax1))
-            self.horizontalScrollBar.setValue(scroll_value)
-
     def ScrollChannel2(self):
         if self.ispaused2 == 1:
             scroll_value = self.horizontalScrollBar_2.value()
@@ -1110,14 +1069,3 @@ class MyWindow(QtWidgets.QMainWindow):
 
             # Update the view range of the plot widget to scroll the graph window
             self.graphWidget2.setXRange(new_x_min, new_x_max, padding=0)
-
-            # Update the horizontal scroll bar range and value
-            self.horizontalScrollBar_2.setRange(0, int(self.Xmax2))
-            self.horizontalScrollBar_2.setValue(scroll_value)
-
-
-if __name__ == "__main__":
-    app = QtWidgets.QApplication(sys.argv)
-    window = MyWindow()
-    window.show()
-    sys.exit(app.exec_())
