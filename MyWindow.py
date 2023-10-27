@@ -28,7 +28,7 @@ import tempfile
 from fpdf import FPDF
 import random
 from PlotLine import *
-import InputDialog
+from InputDialog import *
 
 PlotLines1 = []
 PlotLines2 = []
