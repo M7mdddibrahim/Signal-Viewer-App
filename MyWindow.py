@@ -108,8 +108,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.data_line = None
         self.ishidden1 = 0
         self.ishidden2 = 0
-        self.zoomFactorChannel1 = 1
-        self.zoomFactorChannel2 = 1
+        self.zoomFactorChannel1 = 0
+        self.zoomFactorChannel2 = 0
         self.ispaused1 = 0
         self.ispaused2 = 0
         self.signal1speed = 1
@@ -392,19 +392,20 @@ class MyWindow(QtWidgets.QMainWindow):
                         x_data = newplot.data["time"][: newplot.index + 1]
                         y_data = newplot.data["amplitude"][: newplot.index + 1]
                         newplot.data_line.setData(x_data, y_data)
-                        x_range = self.graphWidget1.getViewBox().viewRange()[0][1] - self.graphWidget1.getViewBox().viewRange()[0][0]
-                        if newplot.index+1 >=x_range and newplot.index+1 <= newplot.data["time"].max():
+                        #x_range = self.graphWidget1.getViewBox().viewRange()[0][1] - self.graphWidget1.getViewBox().viewRange()[0][0]
+                        if (newplot.index-100) >= 0 and newplot.index+1 <= newplot.data["time"].max():
                             self.graphWidget1.setXRange(
-                                newplot.data["time"][int((newplot.index-x_range+1)*self.zoomFactorChannel1)],
+                                newplot.data["time"][int(newplot.index-100+self.zoomFactorChannel1)],
                                 newplot.data["time"][newplot.index+1],
                                 padding=0
                             )
                         else:
-                            self.graphWidget1.setXRange(0,100,padding=0)
+                            self.graphWidget1.setXRange(0+self.zoomFactorChannel1,100,padding=0)
                         self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0]))
                         newplot.index += 1
         elif self.ispaused1 == 1:
-            self.graphWidget1.setLimits(xMin = 0, xMax = newplot.data["time"][newplot.index])
+                if newplot.data["time"][newplot.index] > 100:
+                    self.graphWidget1.setLimits(xMin = 0, xMax = newplot.data["time"][newplot.index])
             # Check if all data is plotted; if so, stop the timer
         if len(PlotLines1) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines1):
@@ -434,24 +435,21 @@ class MyWindow(QtWidgets.QMainWindow):
                 if newplot.isstopped == False:
                     if newplot.index < len(newplot.data):
                         x_data = newplot.data["time"][: newplot.index + 1]
-                        y_data = (
-                            newplot.data["amplitude"][: newplot.index + 1]
-                        )
+                        y_data = newplot.data["amplitude"][: newplot.index + 1]
                         newplot.data_line.setData(x_data, y_data)
                         if newplot.index >=100 and newplot.index+1 <= newplot.data["time"].max():
                             self.graphWidget2.setXRange(
-                                newplot.data["time"][newplot.index-100],
+                                newplot.data["time"][int(newplot.index-100+self.zoomFactorChannel2)],
                                 newplot.data["time"][newplot.index+1],
                                 padding=0
                             )
                         else:
-                            self.graphWidget2.setXRange(0,100,padding=0)
-                        self.horizontalScrollBar.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
-
+                            self.graphWidget2.setXRange(0+self.zoomFactorChannel2,100,padding=0)
+                        self.horizontalScrollBar_2.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
                         newplot.index += 1
         elif self.ispaused2 == 1:
-            
-            self.graphWidget2.setLimits(xMin = self.Xmin2, xMax = newplot.data["time"][newplot.index])
+            if newplot.data["time"][newplot.index] > 100:
+                self.graphWidget2.setLimits(xMin = 0, xMax = newplot.data["time"][newplot.index])
         if len(PlotLines2) > 0:
             if all(newplot.index >= len(newplot.data) for newplot in PlotLines2):
                 self.graphWidget2.setXRange(
@@ -466,118 +464,92 @@ class MyWindow(QtWidgets.QMainWindow):
                 self.timer2.stop()
 
     def zoomInChannel1(self):
-        viewbox = self.graphWidget1.getViewBox()
-        # # Decrease the scale (range) of the X and Y axes to zoom in
-        # new_x_range = viewbox.viewRange()[0]
-        new_y_range = viewbox.viewRange()[1]
-        # new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
-        new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
-        self.zoomFactorChannel1 /= 0.8
-        # viewbox.setXRange(*new_x_range)
-        viewbox.setYRange(*new_y_range)
-        self.update_plots1()
+        x_min, x_max = self.graphWidget1.getViewBox().viewRange()[0]
+        y_min, y_max = self.graphWidget1.getViewBox().viewRange()[1]
+        if x_min+10 < x_max:
+            self.zoomFactorChannel1 += 10
+            self.graphWidget1.setXRange(x_min+10, x_max, padding=0)
+        self.graphWidget1.setYRange(y_min*0.8, y_max*0.8)
+
         if self.connect_status:
-            viewbox = self.graphWidget2.getViewBox()
-            # Decrease the scale (range) of the X and Y axes to zoom in
-            new_x_range = viewbox.viewRange()[0]
-            new_y_range = viewbox.viewRange()[1]
-            new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
-            new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
-            self.zoomFactorChannel2 /= 0.8
-            viewbox.setXRange(*new_x_range)
-            viewbox.setYRange(*new_y_range)
-            self.update_plots2()
+                x_min, x_max = self.graphWidget2.getViewBox().viewRange()[0]
+                y_min, y_max = self.graphWidget2.getViewBox().viewRange()[1]
+                if x_min+10 < x_max:
+                    self.zoomFactorChannel2 += 10
+                    self.graphWidget2.setXRange(x_min+10, x_max, padding=0)
+                self.graphWidget2.setYRange(y_min*0.8, y_max*0.8)
+
 
     def zoomInChannel2(self):
-        viewbox = self.graphWidget2.getViewBox()
-        x_min, x_max = self.graphWidget2.viewRange()[0]
-        # Decrease the scale (range) of the X and Y axes to zoom in
-        new_x_range = viewbox.viewRange()[0]
-        new_y_range = viewbox.viewRange()[1]
-        new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
-        new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
-        self.zoomFactorChannel2 /= 0.8
-        viewbox.setXRange(*new_x_range)
-        viewbox.setYRange(*new_y_range)
-        self.update_plots2()
+        x_min, x_max = self.graphWidget2.getViewBox().viewRange()[0]
+        y_min, y_max = self.graphWidget2.getViewBox().viewRange()[1]
+        if x_min+10 < x_max:
+            self.zoomFactorChannel1 += 10
+            self.graphWidget2.setXRange(x_min+10, x_max, padding=0)
+        self.graphWidget2.setYRange(y_min*0.8, y_max*0.8)
+
         if self.connect_status:
-            viewbox = self.graphWidget1.getViewBox()
-            x_min, x_max = self.graphWidget1.viewRange()[0]
-            # Decrease the scale (range) of the X and Y axes to zoom in
-            new_x_range = viewbox.viewRange()[0]
-            new_y_range = viewbox.viewRange()[1]
-            new_x_range = (new_x_range[0] * 0.8, new_x_range[1] * 0.8)
-            new_y_range = (new_y_range[0] * 0.8, new_y_range[1] * 0.8)
-            self.zoomFactorChannel1 /= 0.8
-            viewbox.setXRange(*new_x_range)
-            viewbox.setYRange(*new_y_range)
-            self.update_plots2()
+                x_min, x_max = self.graphWidget1.getViewBox().viewRange()[0]
+                y_min, y_max = self.graphWidget1.getViewBox().viewRange()[1]
+                if x_min+10 < x_max:
+                    self.zoomFactorChannel1 += 10
+                    self.graphWidget1.setXRange(x_min+10, x_max, padding=0)
+                self.graphWidget1.setYRange(y_min*0.8, y_max*0.8)
 
     def zoomOutChannel1(self):
-        viewbox = self.graphWidget1.getViewBox()
-        x_min, x_max = self.graphWidget1.viewRange()[0]
-        if x_min == 0 and x_max == self.Xmax1:
-            return
-        # Decrease the scale (range) of the X and Y axes to zoom in
-        # new_x_range = viewbox.viewRange()[0]
-        new_y_range = viewbox.viewRange()[1]
-        # new_x_range = (new_x_range[0] / 0.8, new_x_range[1] / 0.8)
-        new_y_range = (new_y_range[0] / 0.8, new_y_range[1] / 0.8)
-        self.zoomFactorChannel1 *= 0.8
-        # viewbox.setXRange(*new_x_range)
-        viewbox.setYRange(*new_y_range)
-        self.update_plots1()
+        x_min, x_max = self.graphWidget1.getViewBox().viewRange()[0]
+        y_min, y_max = self.graphWidget1.getViewBox().viewRange()[1]
+        if x_min-10 < 0:
+            self.graphWidget1.setYRange(y_min/0.8, y_max/0.8)
+            self.graphWidget1.setXRange(0,x_max,padding=0)
+        else:
+            self.zoomFactorChannel1 -= 10
+            self.graphWidget1.setXRange(x_min-10, x_max, padding=0)
+            self.graphWidget1.setYRange(y_min/0.8, y_max/0.8)
+
         if self.connect_status:
-            viewbox = self.graphWidget2.getViewBox()
-            x_min, x_max = self.graphWidget2.viewRange()[0]
-            if x_min == 0 and x_max == self.Xmax2:
-                return
-            # Decrease the scale (range) of the X and Y axes to zoom in
-            new_x_range = viewbox.viewRange()[0]
-            new_y_range = viewbox.viewRange()[1]
-            new_x_range = (new_x_range[0] * 1.2, new_x_range[1] * 1.2)
-            new_y_range = (new_y_range[0] * 1.2, new_y_range[1] * 1.2)
-            self.zoomFactorChannel2 /= 1.2
-            viewbox.setXRange(*new_x_range)
-            viewbox.setYRange(*new_y_range)
-            self.update_plots2()
+            x_min, x_max = self.graphWidget2.getViewBox().viewRange()[0]
+            y_min, y_max = self.graphWidget2.getViewBox().viewRange()[1]
+            if x_min-10 < 0:
+                self.graphWidget2.setYRange(y_min/0.8, y_max/0.8)
+                self.graphWidget2.setXRange(0,x_max,padding=0)
+            else:
+                self.zoomFactorChannel2 -= 10
+                self.graphWidget2.setXRange(x_min-10, x_max, padding=0)
+                self.graphWidget2.setYRange(y_min/0.8, y_max/0.8)
 
 
     def zoomOutChannel2(self):
-        viewbox = self.graphWidget2.getViewBox()
-        x_min, x_max = self.graphWidget2.viewRange()[0]
-        if x_min == 0 and x_max == self.Xmax2:
-            return
-        # Decrease the scale (range) of the X and Y axes to zoom in
-        new_x_range = viewbox.viewRange()[0]
-        new_y_range = viewbox.viewRange()[1]
-        new_x_range = (new_x_range[0] * 1.2, new_x_range[1] * 1.2)
-        new_y_range = (new_y_range[0] * 1.2, new_y_range[1] * 1.2)
-        self.zoomFactorChannel2 /= 1.2
-        viewbox.setXRange(*new_x_range)
-        viewbox.setYRange(*new_y_range)
-        self.update_plots2()
+        x_min, x_max = self.graphWidget2.getViewBox().viewRange()[0]
+        y_min, y_max = self.graphWidget2.getViewBox().viewRange()[1]
+        if x_min-10 < 0:
+            self.graphWidget2.setYRange(y_min/0.8, y_max/0.8)
+            self.graphWidget2.setXRange(0,x_max,padding=0)
+        else:
+            self.zoomFactorChannel2 -= 10
+            self.graphWidget2.setXRange(x_min-10, x_max, padding=0)
+            self.graphWidget2.setYRange(y_min/0.8, y_max/0.8)
+
         if self.connect_status:
-            viewbox = self.graphWidget1.getViewBox()
-            x_min, x_max = self.graphWidget1.viewRange()[0]
-            if x_min == 0 and x_max == self.Xmax1:
-                return
-            # Decrease the scale (range) of the X and Y axes to zoom in
-            new_x_range = viewbox.viewRange()[0]
-            new_y_range = viewbox.viewRange()[1]
-            new_x_range = (new_x_range[0] * 1.2, new_x_range[1] * 1.2)
-            new_y_range = (new_y_range[0] * 1.2, new_y_range[1] * 1.2)
-            self.zoomFactorChannel1 /= 1.2
-            viewbox.setXRange(*new_x_range)
-            viewbox.setYRange(*new_y_range)
-            self.update_plots1()
+            x_min, x_max = self.graphWidget1.getViewBox().viewRange()[0]
+            y_min, y_max = self.graphWidget1.getViewBox().viewRange()[1]
+            if x_min-10 < 0:
+                self.graphWidget1.setYRange(y_min/0.8, y_max/0.8)
+                self.graphWidget1.setXRange(0,x_max,padding=0)
+            else:
+                self.zoomFactorChannel1 -= 10
+                self.graphWidget1.setXRange(x_min-10, x_max, padding=0)
+                self.graphWidget1.setYRange(y_min/0.8, y_max/0.8)
 
 
     def paused1(self):
+        if len(PlotLines1) == 0:
+            return
         if self.ispaused1 == 0:
             self.ispaused1 = 1
         else:
             self.ispaused1 = 0
+
         if self.connect_status:
             if self.ispaused2 == 0:
              self.ispaused2 = 1
@@ -585,10 +557,13 @@ class MyWindow(QtWidgets.QMainWindow):
              self.ispaused2 = 0
 
     def paused2(self):
+        if len(PlotLines2) == 0:
+            return
         if self.ispaused2 == 0:
             self.ispaused2 = 1
         else:
             self.ispaused2 = 0
+
         if self.connect_status:
             if self.ispaused1 == 0:
                 self.ispaused1 = 1
