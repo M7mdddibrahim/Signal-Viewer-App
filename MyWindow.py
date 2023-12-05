@@ -160,12 +160,13 @@ class MyWindow(QtWidgets.QMainWindow):
         self.comboBox.addItems(list)
         self.horizontalScrollBar.setMinimum(0)
 
-        self.timer1 = QtCore.QTimer()
-        self.timer1.setInterval(int(50 / self.signal1speed))
-        self.timer1.timeout.connect(
-            self.update_plots1
-        )  # Connect to a single update method
-        self.timer1.start()
+        # self.timer1 = QtCore.QTimer()
+        # self.timer1.setInterval(int(50 / self.signal1speed))
+        # self.timer1.timeout.connect(
+        #     self.update_plots1
+        # )  # Connect to a single update method
+        # self.timer1.start()
+        self.update_plots1()
 
     def random_color(self):
         red = random.randint(0,255)
@@ -180,12 +181,13 @@ class MyWindow(QtWidgets.QMainWindow):
         newplot.data_line = self.graphWidget1.plot(pen=pen)
         self.horizontalScrollBar.setMinimum(0)
 
-        self.timer1 = QtCore.QTimer()
-        self.timer1.setInterval(int(50 / self.signal1speed))
-        self.timer1.timeout.connect(
-            self.update_plots1
-        )  # Connect to a single update method
-        self.timer1.start()
+        # self.timer1 = QtCore.QTimer()
+        # self.timer1.setInterval(int(50 / self.signal1speed))
+        # self.timer1.timeout.connect(
+        #     self.update_plots1
+        # )  # Connect to a single update method
+        # self.timer1.start()
+        self.update_plots1()
 
     def DrawChannel2(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
@@ -204,12 +206,13 @@ class MyWindow(QtWidgets.QMainWindow):
         self.comboBox_2.addItems(list)
         self.horizontalScrollBar_2.setMinimum(0)
 
-        self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(int(50 / self.signal2speed))
-        self.timer2.timeout.connect(
-            self.update_plots2
-        )  # Connect to a single update method
-        self.timer2.start()
+        # self.timer2 = QtCore.QTimer()
+        # self.timer2.setInterval(int(50 / self.signal2speed))
+        # self.timer2.timeout.connect(
+        #     self.update_plots2
+        # )  # Connect to a single update method
+        # self.timer2.start()
+        self.update_plots2()
 
     def Draw2(self,newplot):
         newplot.index = 0
@@ -217,12 +220,13 @@ class MyWindow(QtWidgets.QMainWindow):
         newplot.data_line = self.graphWidget2.plot(pen=pen)
         self.horizontalScrollBar_2.setMinimum(0)
 
-        self.timer2 = QtCore.QTimer()
-        self.timer2.setInterval(int(50 / self.signal2speed))
-        self.timer2.timeout.connect(
-            self.update_plots2
-        )  # Connect to a single update method
-        self.timer2.start()
+        # self.timer2 = QtCore.QTimer()
+        # self.timer2.setInterval(int(50 / self.signal2speed))
+        # self.timer2.timeout.connect(
+        #     self.update_plots2
+        # )  # Connect to a single update method
+        # self.timer2.start()
+        self.update_plots2()
 
     def load1(self,path):
         if path.endswith(ext):
@@ -348,9 +352,11 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.isstopped = False
             self.graphWidget1.removeItem(newplot.data_line)
             self.Draw1(newplot)
+            self.zoomFactorChannel1 = 0
         else:
             newplot.isstopped = False
             newplot.index = 0
+            self.zoomFactorChannel1 = 0
 
     def rewind2(self):
         newplot = self.GetChosenPlotLine2()
@@ -363,9 +369,11 @@ class MyWindow(QtWidgets.QMainWindow):
             newplot.isstopped = False
             self.graphWidget2.removeItem(newplot.data_line)
             self.Draw2(newplot)
+            self.zoomFactorChannel2 = 0
         else:
             newplot.isstopped = False
             newplot.index = 0
+            self.zoomFactorChannel2 = 0
 
     def ErrorMsg(self, text):
         msg = QMessageBox()
@@ -374,7 +382,7 @@ class MyWindow(QtWidgets.QMainWindow):
         msg.setIcon(QMessageBox.Warning)
         x = msg.exec_()
 
-    def update_plots1(self):
+    def  update_plots1(self):
         self.horizontalScrollBar.setMaximum(int(self.Xmax1))
         self.timer1 = QtCore.QTimer()
         self.timer1.setInterval(int(50 / self.signal1speed))
@@ -619,6 +627,8 @@ class MyWindow(QtWidgets.QMainWindow):
                 i += 1
         # Clear the combo box and then get length and loop for names
         # Update the second graph to ensure the data is plotted
+        if newplot.index >= len(newplot.data):
+            newplot.data_line.setData(newplot.data["time"],newplot.data["amplitude"])
         self.update_plots2()
 
     def Move2(self):
@@ -669,6 +679,8 @@ class MyWindow(QtWidgets.QMainWindow):
                 i += 1
         # Clear the combo box and then get length and loop for names
         # Update the second graph to ensure the data is plotted
+        if newplot.index >= len(newplot.data):
+            newplot.data_line.setData(newplot.data["time"],newplot.data["amplitude"])
         self.update_plots1()
 
 
@@ -802,7 +814,7 @@ class MyWindow(QtWidgets.QMainWindow):
 
     def SnapshotChannel1(self):
         # Capture the content of the graphWidget1 widget
-        pixmap = self.graphWidget1.grab() #eh pixmapp dyh
+        pixmap = self.graphWidget1.grab() 
         image = pixmap.toImage()
         snapshots1.append(image)
         image.save("snapshot_channel1" + str(len(snapshots1)) + ".png")
@@ -922,22 +934,20 @@ class MyWindow(QtWidgets.QMainWindow):
                     pdf.cell(col_width, row_height, str(item), border=1, ln=False)
                 pdf.ln(row_height)
             pdf.set_y(x)
-        x-=280
+        # x-=100
         pdf.set_y(x)
         pdf.cell(200, 5, align="C", txt="Plot widget 2 Signals Statistics", ln=True)
-        x+=20
+        x-=260
         pdf.set_y(x)
+        
 
         for plotline2 in PlotLines2:
-            
             x+=60
             for row in plotline2.StatisticalData:
                 for item in row:
                     pdf.cell(col_width, row_height, str(item), border=1, ln=False)
                 pdf.ln(row_height)
             pdf.set_y(x)
-       
-
         pdf.output(mypdf)
 
     def channelstatistics(self):
