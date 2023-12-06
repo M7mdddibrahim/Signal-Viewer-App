@@ -817,70 +817,173 @@ class MyWindow(QtWidgets.QMainWindow):
         pixmap = self.graphWidget1.grab() 
         image = pixmap.toImage()
         snapshots1.append(image)
+        while len(snapshots1)>3:
+            snapshots1.pop()
         image.save("snapshot_channel1" + str(len(snapshots1)) + ".png")
         # Display a message to the user
         msg = QMessageBox()
         msg.setWindowTitle("Snapshot Saved")
         msg.setText("Snapshot_channel1" + str(len(snapshots1)) + ".png")
+        msg.setInformativeText("Note That the Maxiumum viewable Snapshots in the report is 3.")
         msg.setIcon(QMessageBox.Information)
         msg.exec_()
+        
 
     def SnapshotChannel2(self):
         # Capture the content of the graphWidget1 widget
         pixmap = self.graphWidget2.grab()
         image = pixmap.toImage()
         snapshots2.append(image)
+        while len(snapshots2)>3:
+            snapshots2.pop()
         image.save("snapshot_channel2" + str(len(snapshots2)) + ".png")
         # Display a message to the user
         msg = QMessageBox()
         msg.setWindowTitle("Snapshot Saved")
         msg.setText("Snapshot_channel2" + str(len(snapshots2)) + ".png")
+        msg.setInformativeText("Note That the Maxiumum viewable Snapshots in the report is 3.")
         msg.setIcon(QMessageBox.Information)
         msg.exec_()
 
     def create_pdf_with_qimages(self):
         pdf = FPDF()
         pdf.add_page()
+        pdf.set_font("Arial", "B", 15)
+        pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
+        
+        pdf.set_y(30)
+        pdf.set_font("Arial", "B", 12)
+        pdf.cell(200, 5, align="C", txt="Plotwidget 1 Snapshots ", ln=True)
+        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2)) +".pdf"
+        i = 0
+        if len(snapshots1)>=3:
+            while i < len(snapshots1):
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
+
+                x = ((page_width - image_width) / 2)+10
+                y = (page_height - image_height) / 2
+                pdf.image(
+                    "snapshot_channel1" + str(i + 1) + ".png",
+                    x=(x * i),
+                    y=50,
+                    w=image_width,
+                    h=image_height,
+                )
+                i += 1
+        elif len(snapshots1)==2:
+             while i < len(snapshots1):
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
+
+                x = ((page_width - image_width) / 2)+50
+                y = (page_height - image_height) / 2
+                if i==0:
+                     pdf.image(
+                    "snapshot_channel1" + str(i + 1) + ".png",
+                    x=((page_width - image_width) / 2)-20,
+                    y=50,
+                    w=image_width,
+                    h=image_height,
+                )
+                else:
+                    
+                    pdf.image(
+                        "snapshot_channel1" + str(i + 1) + ".png",
+                        x=(x * i),
+                        y=50,
+                        w=image_width,
+                        h=image_height,
+                    )
+                i += 1
+        elif len(snapshots1)==1:
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
+
+                x = ((page_width - image_width) / 2)+16
+                y = (page_height - image_height) / 2
+                pdf.image(
+                    "snapshot_channel1" + str(i + 1) + ".png",
+                    x=(x),
+                    y=50,
+                    w=image_width,
+                    h=image_height,
+                )
+            
+            
+        pdf.set_y(120)
+        pdf.cell(200, 5, align="C", txt="Plotwidget 2 Snapshots ", ln=True)
         pdf.set_font(
             "Arial",
             size=10,
         )
-        pdf.cell(200, 5, align="C", txt="Signal Viewer Report", ln=True)
-        mypdf = "Signal Viewer Report" + str(len(snapshots1) + len(snapshots2)) +".pdf"
         i = 0
-        while i < len(snapshots1):
-            image_width = 50  # Set the desired image width
-            image_height = 50  # Set the desired image height
-            page_width = pdf.w - 2 * pdf.l_margin
-            page_height = pdf.h - 2 * pdf.t_margin
+        if len(snapshots2)>=3:
+            while i < len(snapshots2):
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
 
-            x = ((page_width - image_width) / 2)+10
-            y = (page_height - image_height) / 2
-            pdf.image(
-                "snapshot_channel1" + str(i + 1) + ".png",
-                x=(x * i),
-                y=30,
-                w=image_width,
-                h=image_height,
-            )
-            i += 1
-        counter = 0
-        while counter < len(snapshots2):
-            image_width = 50  # Set the desired image width
-            image_height = 50  # Set the desired image height
-            page_width = pdf.w - 2 * pdf.l_margin
-            page_height = pdf.h - 2 * pdf.t_margin
+                x = ((page_width - image_width) / 2)+10
+                y = (page_height - image_height) / 2
+                pdf.image(
+                    "snapshot_channel2" + str(i + 1) + ".png",
+                    x=(x * i),
+                    y=140,
+                    w=image_width,
+                    h=image_height,
+                )
+                i += 1
+        elif len(snapshots2)==2:
+             while i < len(snapshots2):
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
 
-            x = ((page_width - image_width) / 2)+10
-            y = (page_height - image_height) / 2
-            pdf.image(
-                "snapshot_channel2" + str(counter + 1) + ".png",
-                x=(x * counter),
-                y=90,
-                w=image_width,
-                h=image_height,
-            )
-            counter += 1
+                x = ((page_width - image_width) / 2)+50
+                y = (page_height - image_height) / 2
+                if i==0:
+                     pdf.image(
+                    "snapshot_channel2" + str(i + 1) + ".png",
+                    x=((page_width - image_width) / 2)-20,
+                    y=140,
+                    w=image_width,
+                    h=image_height,
+                )
+                else:
+                    
+                    pdf.image(
+                        "snapshot_channel2" + str(i + 1) + ".png",
+                        x=(x * i),
+                        y=140,
+                        w=image_width,
+                        h=image_height,
+                    )
+                i += 1
+        elif len(snapshots2)==1:
+                image_width = 50  # Set the desired image width
+                image_height = 50  # Set the desired image height
+                page_width = pdf.w - 2 * pdf.l_margin
+                page_height = pdf.h - 2 * pdf.t_margin
+
+                x = ((page_width - image_width) / 2)+16
+                y = (page_height - image_height) / 2
+                pdf.image(
+                    "snapshot_channel2" + str(i + 1) + ".png",
+                    x=(x),
+                    y=140,
+                    w=image_width,
+                    h=image_height,
+                )
+        
         self.channelstatistics()
         counter2=0
         for plotline1 in PlotLines1:
@@ -918,25 +1021,39 @@ class MyWindow(QtWidgets.QMainWindow):
                     plotline2.maxmiumAmplitude,
                 ]
             ]
-        pdf.set_y(150)
+        pdf.set_y(200)
+        pdf.set_font("Arial", "B", 12)
         pdf.cell(200, 5, align="C", txt="Plot widget 1 Signals Statistics", ln=True)
+        pdf.set_font(
+            "Arial",
+            size=10,
+        )
         col_width = pdf.w / 4.5
         row_height = 20
 
-        pdf.set_y(170)
-        x=170
+        pdf.set_y(220)
+        x=220
         # Add a table at the bottom
         for plotline1 in PlotLines1:
             
             x+=60
             for row in plotline1.StatisticalData:
+                if plotline1.StatisticalData.index(row) == 0:
+                    pdf.set_font("Arial", "B", 9)
+                else:
+                    pdf.set_font("Arial", size=9)
                 for item in row:
                     pdf.cell(col_width, row_height, str(item), border=1, ln=False)
                 pdf.ln(row_height)
             pdf.set_y(x)
-        # x-=100
+        x-=250
         pdf.set_y(x)
+        pdf.set_font("Arial", "B", 12)
         pdf.cell(200, 5, align="C", txt="Plot widget 2 Signals Statistics", ln=True)
+        pdf.set_font(
+            "Arial",
+            size=10,
+        )
         x-=260
         pdf.set_y(x)
         
@@ -944,6 +1061,10 @@ class MyWindow(QtWidgets.QMainWindow):
         for plotline2 in PlotLines2:
             x+=60
             for row in plotline2.StatisticalData:
+                if plotline2.StatisticalData.index(row) == 0:
+                    pdf.set_font("Arial", "B", 9)
+                else:
+                    pdf.set_font("Arial", size=9)
                 for item in row:
                     pdf.cell(col_width, row_height, str(item), border=1, ln=False)
                 pdf.ln(row_height)
