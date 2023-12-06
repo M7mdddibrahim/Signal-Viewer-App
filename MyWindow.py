@@ -78,8 +78,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.actionrewind2.triggered.connect(self.rewind2)
         self.actionSave_As_PDF.triggered.connect(self.create_pdf_with_qimages)
         self.actionConnect.triggered.connect(self.ConnectGraphs)
-        self.horizontalScrollBar.valueChanged.connect(self.ScrollChannel1)
-        self.horizontalScrollBar_2.valueChanged.connect(self.ScrollChannel2)
+        self.horizontalScrollBar.actionTriggered.connect(self.ScrollChannel1)
+        self.horizontalScrollBar_2.actionTriggered.connect(self.ScrollChannel2)
 
 
         # self.setHorizontalScrollBarPolicy(QtCore.ScrollBarAlwaysOff)
@@ -103,8 +103,8 @@ class MyWindow(QtWidgets.QMainWindow):
         self.graphWidget2.setXRange(0,100,padding=0)
         self.ui.gridLayout_2.addWidget(self.graphWidget1)
         self.ui.gridLayout_3.addWidget(self.graphWidget2)
-        self.graphWidget1.setMouseEnabled(x=False,y=False)
-        self.graphWidget2.setMouseEnabled(x=False,y=False)
+        self.graphWidget1.setMouseEnabled(x=False,y=True)
+        self.graphWidget2.setMouseEnabled(x=False,y=True)
         self.data_line = None
         self.ishidden1 = 0
         self.ishidden2 = 0
@@ -453,7 +453,7 @@ class MyWindow(QtWidgets.QMainWindow):
                             )
                         else:
                             self.graphWidget2.setXRange(0+self.zoomFactorChannel2,100,padding=0)
-                        self.horizontalScrollBar_2.setValue(int(self.graphWidget1.getViewBox().viewRange()[0][0])*10)
+                        self.horizontalScrollBar_2.setValue(int(self.graphWidget2.getViewBox().viewRange()[0][0]))
                         newplot.index += 1
         elif self.ispaused2 == 1:
             if newplot.data["time"][newplot.index] > 100:
@@ -696,7 +696,7 @@ class MyWindow(QtWidgets.QMainWindow):
         else:
             # Connect the graphs
             self.connect_status = True
-
+            self.ispaused2 = self.ispaused1
             # Save the current view range of the first graph
             x_range1, y_range1 = self.graphWidget1.getViewBox().viewRange()
             self.saved_view_range = (x_range1, y_range1)
@@ -1072,25 +1072,23 @@ class MyWindow(QtWidgets.QMainWindow):
         pdf.output(mypdf)
 
     def channelstatistics(self):
-            signalnumbers_1=len(PlotLines1)
-            signalnumbers_2=len(PlotLines2)
             for plotline1 in PlotLines1:
-                timesum= plotline1.data["time"].sum()
-                amplitude_sum=plotline1.data["amplitude"].sum()
-                plotline1.timeMean=timesum/len(plotline1.data["time"])
-                plotline1.amplitudeMean=amplitude_sum/len(plotline1.data["amplitude"])
-                plotline1.maxmiumAmplitude=plotline1.data["amplitude"].max()
-                plotline1.minimumAmplitude=plotline1.data["amplitude"].min()
-                plotline1.maxmiumTime=plotline1.data["time"].max()
+                timesum=round(plotline1.data["time"].sum(),2)
+                amplitude_sum=round(plotline1.data["amplitude"].sum(),2)
+                plotline1.timeMean=round(timesum/len(plotline1.data["time"]),2)
+                plotline1.amplitudeMean=round(amplitude_sum/len(plotline1.data["amplitude"]),2)
+                plotline1.maxmiumAmplitude=round(plotline1.data["amplitude"].max(),2)
+                plotline1.minimumAmplitude=round(plotline1.data["amplitude"].min(),2)
+                plotline1.maxmiumTime=round(plotline1.data["time"].max(),2)
             
             for plotline2 in PlotLines2:
-                timesum= plotline2.data["time"].sum()
-                amplitude_sum=plotline2.data["amplitude"].sum()
-                plotline2.timeMean=timesum/len(plotline2.data["time"])
-                plotline2.amplitudeMean=amplitude_sum/len(plotline2.data["amplitude"])
-                plotline2.maxmiumAmplitude=plotline2.data["amplitude"].max()
-                plotline2.minimumAmplitude=plotline2.data["amplitude"].min()
-                plotline2.maxmiumTime=plotline2.data["time"].max()
+                timesum=round(plotline2.data["time"].sum(),2)
+                amplitude_sum=round(plotline2.data["amplitude"].sum(),2)
+                plotline2.timeMean=round(timesum/len(plotline2.data["time"]),2)
+                plotline2.amplitudeMean=round(amplitude_sum/len(plotline2.data["amplitude"]),2)
+                plotline2.maxmiumAmplitude=round(plotline2.data["amplitude"].max(),2)
+                plotline2.minimumAmplitude=round(plotline2.data["amplitude"].min(),2)
+                plotline2.maxmiumTime=round(plotline2.data["time"].max(),2)
 
     def GetChosenPlotLine1(self):
         Index = self.comboBox.currentIndex()
@@ -1157,11 +1155,18 @@ class MyWindow(QtWidgets.QMainWindow):
             xmin = self.graphWidget1.getViewBox().viewRange()[0][0]
             xmax = self.graphWidget1.getViewBox().viewRange()[0][1]
             xrange = xmax - xmin
-            new_x_min = scroll_value
-            new_x_max = new_x_min + xrange
-
-            # Update the view range of the plot widget to scroll the graph window
+            if scroll_value - xrange >= 0:
+                new_x_min = scroll_value - xrange
+                new_x_max = scroll_value    
+            else:
+                new_x_min=0
+                new_x_max=xrange
+                scroll_value = 0
+                # Update the view range of the plot widget to scroll the graph window
             self.graphWidget1.setXRange(new_x_min, new_x_max, padding=0)
+            if self.connect_status == True:
+                self.horizontalScrollBar_2.setValue(scroll_value)
+                self.graphWidget2.setXRange(new_x_min,new_x_max,padding=0)
 
     def ScrollChannel2(self):
         if self.ispaused2 == 1:
@@ -1170,8 +1175,15 @@ class MyWindow(QtWidgets.QMainWindow):
             xmin = self.graphWidget2.getViewBox().viewRange()[0][0]
             xmax = self.graphWidget2.getViewBox().viewRange()[0][1]
             xrange = xmax - xmin
-            new_x_min = scroll_value
-            new_x_max = new_x_min + xrange
-
+            if scroll_value - xrange >= 0:
+                new_x_min = scroll_value - xrange
+                new_x_max = scroll_value    
+            else:
+                new_x_min=0
+                new_x_max=xrange
+                scroll_value = 0
             # Update the view range of the plot widget to scroll the graph window
             self.graphWidget2.setXRange(new_x_min, new_x_max, padding=0)
+            if self.connect_status == True:
+                self.horizontalScrollBar.setValue(scroll_value)
+                self.graphWidget1.setXRange(new_x_min,new_x_max,padding=0)
