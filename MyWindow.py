@@ -681,7 +681,7 @@ class MyWindow(QtWidgets.QMainWindow):
         list.append("Choose Channel")
         self.comboBox_2.addItems(list)
         if newplot.data["time"][len(newplot.data["time"]) - 1] > self.Xmax1:
-            self.Xmax2 = newplot.data["time"][len(newplot.data["time"]) - 1]
+            self.Xmax1 = newplot.data["time"][len(newplot.data["time"]) - 1]
         if newplot.data["amplitude"].min() < self.Ymin1:
             self.Ymin1 = newplot.data["amplitude"].min()
         if newplot.data["amplitude"].max() > self.Ymax1:
